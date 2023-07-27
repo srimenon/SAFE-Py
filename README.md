@@ -1,3 +1,5 @@
+![plot](SAFELogo.png)
+
 # SAFEPy
 This repository contains the SAFEPy Programmable Query Application for querying the National Transportation Safety Board investigations database.
 This was developed by Gage Broberg, Wyatt McGinnis, Srihari Menon and Prof Nancy Currie-Gregg from the Systems Analysis & Functional Evaluation Laboratory (SAFELab) at Texas A&M University.
