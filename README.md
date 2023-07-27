@@ -1,3 +1,5 @@
+![plot](SAFELogo.png)
+
 # SAFEPy Programmable Query Application
 This repository contains the SAFEPy Programmable Query Application for querying the CAROL database hosted by the National Transportation Safety Board.
 
