@@ -1,5 +1,7 @@
-# SAFEPy Programmable Query Application
-This repository contains the SAFEPy Programmable Query Application for querying the CAROL database hosted by the National Transportation Safety Board.
+# SAFEPy
+This repository contains the SAFEPy Programmable Query Application for querying the National Transportation Safety Board investigations database.
+This was developed by Gage Broberg, Wyatt McGinnis, Srihari Menon and Prof Nancy Currie-Gregg from the Systems Analysis & Functional Evaluation Laboratory (SAFELab) at Texas A&M University.
+This tool is open-source and free-to-use. Please reference our publication when you do!
 
 ## Implementation
 The application is contained in a single python file `SAFEPy.py` and can be added using the standard python `import`. The module itself contains the `CAROLQuery` class, which is used by the application to interact with the CAROL database, along with the standard `query` function, which takes in a set of rules to query CAROL with.
