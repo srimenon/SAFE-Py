@@ -1,4 +1,4 @@
-![plot](SAFELogo.png)
+![plot](SAFELogoSmall.png)
 
 # SAFEPy
 This repository contains the SAFEPy Programmable Query Application for querying the National Transportation Safety Board investigations database.
