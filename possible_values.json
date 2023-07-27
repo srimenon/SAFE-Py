@@ -1,0 +1,529 @@
+{
+    "fields": [
+        {
+            "value": "Aircraft",
+            "subfields": [
+                {
+                    "value": "AircraftCategory",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": "AIR",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "BALL",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "BLIM",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "CSF",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "GLI",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "GYRO",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "HELI",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "PPAR",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "PLFT",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "RCKT",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "ULTR",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "UNK",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "UNMANNED",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "WSFT",
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "EngineType",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": "ELEC",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "GTFN",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "HR",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "LR",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "NONE",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "REC",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "SR",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "TF",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "TJ",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "TP",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "TS",
+                            "conditions": ["is", "is not"]
+                          },
+                          {
+                            "value": "UNK",
+                            "conditions": ["is", "is not"]
+                          }
+                    ]
+                },
+                {
+                    "value": "RegistrationNumber",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "AircraftMake",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "AircraftModel",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "AmateurBuilt",
+                    "input": "Boolean",
+                    "queryValues": [
+                        {
+                            "value": "true",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "false",
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "NumberOfEngines",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not", "is greater than", "is less than"]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "Airport",
+            "subfields": [
+                {
+                    "value": "AirportId",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "AirportName",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "AviationOperation",
+            "subfields": [
+                {
+                    "value": "RegisteredOwner",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "OperatorName",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "GaFlight",
+                    "input": "Boolean",
+                    "queryValues": [
+                        {
+                            "value": "true",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "false",
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "RegulationFlightConductedUnder",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "FlightOperationType",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "FlightServiceType",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "FlightScheduledType",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "AirMedical",
+                    "input": "Boolean",
+                    "queryValues": [
+                        {
+                            "value": "true",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "false",
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "RevenueSightseeing",
+                    "input": "Boolean",
+                    "queryValues": [
+                        {
+                            "value": "true",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "false",
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "SecondPilotPresent",
+                    "input": "Boolean",
+                    "queryValues": [
+                        {
+                            "value": "true",
+                            "conditions": ["is", "is not"]
+                        },
+                        {
+                            "value": "false",
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "Narrative",
+            "subfields": [
+                {
+                    "value": "Prelim",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "Factual",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "Analysis",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "EventSequence",
+            "subfields": [
+                {
+                    "value": "CICTTEventSOEGroup",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "Weather",
+            "subfields": [
+                {
+                    "value": "AccidentSiteCondition",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "Event",
+            "subfields": [
+                {
+                    "value": "NTSBNumber",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "Mode",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": "Aviation",
+                            "conditions": [ "is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "ID",
+                    "input": "Int",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not", "is greater than", "is less than"]
+                        }
+                    ]
+                },
+                {
+                    "value": "ReportNumber",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "LeadAgency",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [ "is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "OriginalPublishedDate",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [ "is", "is not", "is after", "is before", "is on or after", "is on or before"]
+                        }
+                    ]
+                },
+                {
+                    "value": "EventDate",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [ "is", "is not", "is after", "is before", "is on or after", "is on or before"]
+                        }
+                    ]
+                },
+                {
+                    "value": "City",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                        }
+                    ]
+                },
+                {
+                    "value": "State",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "Country",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "HighestInjury",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                },
+                {
+                    "value": "EventType",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": ["is", "is not"]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "HasSafetyRec",
+            "input": "Boolean",
+            "queryValues": [
+                {
+                    "value": "true",
+                    "conditions": ["is", "is not"]
+                },
+                {
+                    "value": "false",
+                    "conditions": ["is", "is not"]
+                }
+            ]
+        }
+    ]
+}
