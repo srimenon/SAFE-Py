@@ -80,7 +80,7 @@ class CAROLQuery:
             "QueryGroups": [
                 {
                     "QueryRules": [],
-                    "AndOr": "or",
+                    "AndOr": "and",
                     "inLastSearch": False,
                     "editedSinceLastSearch": False
                 }
@@ -96,7 +96,7 @@ class CAROLQuery:
     def __del__(self):
         self._session.close()
 
-    def addQueryRule(self, field, subfield, condition, values):
+    def addQueryRule(self, field, subfield, condition, values, andOr):
         """Adds a query rule to the CAROLQuery class.
         """
         if condition and subfield and field:
@@ -130,7 +130,13 @@ class CAROLQuery:
             },
             "overrideColumn": ""
         }
-
+        
+        if andOr:
+            self._probe["QueryGroups"][0]["AndOr"] = "and"
+            self._payload["QueryGroups"][0]["AndOr"] = "and"
+        else:
+            self._probe["QueryGroups"][0]["AndOr"] = "or"
+            self._payload["QueryGroups"][0]["AndOr"] = "or"
         self._probe["QueryGroups"][0]["QueryRules"].append(rule)
         self._payload["QueryGroups"][0]["QueryRules"].append(rule)
 
@@ -304,7 +310,7 @@ def query_rule_sort(arg):
 
     return rule
 
-def query(*args, download = False):
+def query(*args, download = False, requireAll = True):
     """A one-time query to the CAROL Database.
     The queries are input as a list of tuples or strings.
     """
@@ -335,7 +341,7 @@ def query(*args, download = False):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
 
         #Add query rule from args
-        q.addQueryRule(field, subfield, condition, value)
+        q.addQueryRule(field, subfield, condition, value, requireAll)
 
     #Run the query
     q.query()
