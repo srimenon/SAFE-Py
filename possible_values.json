@@ -441,7 +441,7 @@
                 },
                 {
                     "value": "OriginalPublishedDate",
-                    "input": "Text",
+                    "input": "Date",
                     "queryValues": [
                         {
                             "value": null,
@@ -451,7 +451,7 @@
                 },
                 {
                     "value": "EventDate",
-                    "input": "Text",
+                    "input": "Date",
                     "queryValues": [
                         {
                             "value": null,
