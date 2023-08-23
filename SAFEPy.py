@@ -3,6 +3,7 @@ import zipfile
 import os
 import json
 import re
+from datetime import datetime
 
 # Define the URL
 probe_url = "https://data.ntsb.gov/carol-main-public/api/Query/Main"
@@ -240,16 +241,35 @@ class CAROLQuery:
 
             # remove the zip file
             os.remove(f'./output/{folder}.zip')
+            
+def to_standard_date_format(date_str):
+    input_formats = [
+        '%m/%d/%y', '%m-%d-%y', '%d/%m/%y', '%d-%m-%y',
+        '%m/%d/%Y', '%m-%d-%Y', '%d/%m/%Y', '%d-%m-%Y',
+    ]
+    output_format = '%Y-%m-%d'
+    
+    for format_str in input_formats:
+        try:
+            date_obj = datetime.strptime(date_str, format_str)
+            return date_obj.strftime(output_format)
+        except ValueError:
+            pass
+    
+    return None
 
 def query_decide(value: str):
     """Using pattern matching, decides which field, subfield, and condition an arbitrary value falls under.
     """
-    date_regex = r"[0-9]{1,2}[\/|-][0-9]{1,2}[\/|-][0-9]{2,4}"
+    cond_date_regex = r'(.+?)? ?(\d{1,2}[\/|-]\d{1,2}[\/|-]\d{2,4})'
+    
+    match = re.match(cond_date_regex, value)
+    if match.group(1):
+        return "Event", "EventDate", match.group(1), to_standard_date_format(match.group(2))
+    elif match.group(2):
+        return "Event", "EventDate", "is after", to_standard_date_format(match.group(2))
 
-    if re.match(date_regex, value):
-        return "Event", "EventDate", "is after"
-
-    return "Narrative", "Factual", "contains"
+    return "Narrative", "Factual", "contains", value
 
 def query_key_sort(value):
     str_methods = [str, str.lower, str.capitalize, str.upper]
@@ -270,9 +290,8 @@ def query_rule_sort(arg):
     rule = [None]*4
 
     if (type(arg) == str) or (len(arg) == 1):
-            if type(arg) == tuple: arg = arg[0]
-            rule[0:3] = query_decide(arg)
-            rule[3] = arg
+        if type(arg) == tuple: arg = arg[0]
+        rule[0:4] = query_decide(arg)
 
     #If two arguments found
     elif (len(arg) == 2):
