@@ -193,7 +193,7 @@ class CAROLQuery:
         response = None
         try:
             # print dots to signify working
-            print(f"Downloading query from CAROL...")
+            print(f"Downloading data from CAROL...")
             response = self._session.post(file_url, json=self._payload, timeout=60)
         except requests.exceptions.Timeout:
             print("The request timed out")
@@ -241,8 +241,8 @@ class CAROLQuery:
             # remove the zip file
             os.remove(f'./output/{folder}.zip')
 
-def query_decide(value):
-    """Using pattern matching, decides which field, subfield, and condition a arbitrary value falls under.
+def query_decide(value: str):
+    """Using pattern matching, decides which field, subfield, and condition an arbitrary value falls under.
     """
     date_regex = r"[0-9]{1,2}[\/|-][0-9]{1,2}[\/|-][0-9]{2,4}"
 
@@ -326,7 +326,7 @@ def query(*args, download = False, requireAll = True):
     for arg in args:
         field, subfield, condition, value = query_rule_sort(arg)
         
-        #Check to make sure all query parameters were filed
+        #Check to make sure all query parameters were filled
         e_list = []
         if not field:
             e_list.append("Field")
