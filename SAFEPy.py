@@ -36,9 +36,11 @@ for field in raw_json["fields"]:
         tmp1_dict[None]["values"] = []
         for queryValue in field["queryValues"]:
             tmp1_dict[None]["values"].append(queryValue["value"])
-        
-# Define a global lock for multiprocessing
-lock = Lock()
+
+# multiprocessing lock init
+def init(l):
+    global lock
+    lock = l
 
 class query_keys:
     """Query keys macro
@@ -600,8 +602,9 @@ if __name__ == '__main__':
     # query(("Analysis Narrative", "does not contain", "alcohol"))
     # query(("fire", "after 1/1/13", "before 1/1/14"))
     constraints = [
+    # 'is on or after 10/24/1948',
     'is on or after 1/1/2020',
-    'is before 1/3/2021',
+    'is before 3/1/2022',
     # 'is before 6/3/2017',
     # 'is 6/6/2013',
     # 'is not 6/6/2020',
@@ -629,7 +632,8 @@ if __name__ == '__main__':
         
     # Create a multiprocessing Pool with the desired number of processes
     num_processes = cpu_count()  # Use all available CPU cores
-    pool = Pool(processes=num_processes)
+    l = Lock()
+    pool = Pool(initializer=init, initargs=(l,), processes=num_processes)
     
     start_time = time.time()
     
