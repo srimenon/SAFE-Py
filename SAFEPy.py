@@ -6,7 +6,7 @@ import re
 from datetime import datetime, timedelta
 import calendar
 import time
-from multiprocessing import Pool, Lock, cpu_count
+from multiprocessing import Pool, Lock, Semaphore, cpu_count
 
 # Define the URL
 probe_url = "https://data.ntsb.gov/carol-main-public/api/Query/Main"
@@ -38,9 +38,11 @@ for field in raw_json["fields"]:
             tmp1_dict[None]["values"].append(queryValue["value"])
 
 # multiprocessing lock init
-def init(l):
+def init(l,s):
     global lock
+    global sem
     lock = l
+    sem = s
 
 class query_keys:
     """Query keys macro
@@ -80,7 +82,7 @@ class CAROLQuery:
             "SortColumn": None,
             "SortDescending": True,
             "TargetCollection": "cases",
-            "SessionId": 217242
+            "SessionId": 100000
         }
 
         #Creates an unfinished payload (download probe) with rules to be added
@@ -96,7 +98,7 @@ class CAROLQuery:
             "AndOr": "and",
             "TargetCollection": "cases",
             "ExportFormat": "summary",
-            "SessionId": 217242,
+            "SessionId": 100000,
             "ResultSetSize": 50,
             "SortDescending": True
         }
@@ -167,9 +169,13 @@ class CAROLQuery:
         # Send the probe POST request
         response = None
         try:
+            with sem:
+                # avoids erroring concurrent api requests
+                time.sleep(0.3)
             # print query parameters currently working on
             print("Querying CAROL...")
             response = self._session.post(probe_url, json=self._probe, timeout=60)
+                
         except requests.exceptions.Timeout:
             print("The request timed out")
         except requests.exceptions.RequestException as e:
@@ -181,7 +187,10 @@ class CAROLQuery:
             return
         else:
             # Ensure we got a successful response
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                print(f"An error occured querying {self._values}: {e}")
 
             print("\nsuccessful probe")
 
@@ -216,7 +225,10 @@ class CAROLQuery:
             return
         else:
             # Ensure we got a successful response
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                print(f"An error occured downloading {self._values}: {e}")
 
             print("\nsuccessful file request")
 
@@ -629,11 +641,15 @@ if __name__ == '__main__':
         print(f"{period_start.strftime('%m/%d/%Y')} - {period_end.strftime('%m/%d/%Y')}")
         
     query_segments = format_segments_as_constraints(segments)
-        
+    
+    # Max number of concurrent processes for probe query
+    max_concurrent_processes = 1
+            
     # Create a multiprocessing Pool with the desired number of processes
     num_processes = cpu_count()  # Use all available CPU cores
     l = Lock()
-    pool = Pool(initializer=init, initargs=(l,), processes=num_processes)
+    s = Semaphore(max_concurrent_processes)
+    pool = Pool(initializer=init, initargs=(l,s), processes=num_processes)
     
     start_time = time.time()
     
