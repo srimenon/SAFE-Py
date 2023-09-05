@@ -6,7 +6,8 @@ import re
 from datetime import datetime, timedelta
 import calendar
 import time
-from multiprocessing import Pool, Lock, Semaphore, cpu_count
+from multiprocessing import Pool, Lock, cpu_count
+from functools import partial
 
 # Define the URL
 probe_url = "https://data.ntsb.gov/carol-main-public/api/Query/Main"
@@ -38,11 +39,11 @@ for field in raw_json["fields"]:
             tmp1_dict[None]["values"].append(queryValue["value"])
 
 # multiprocessing lock init
-def init(l,s):
-    global lock
-    global sem
-    lock = l
-    sem = s
+def init(ql,dl):
+    global query_lock
+    global download_lock
+    query_lock = ql
+    download_lock = dl
 
 class query_keys:
     """Query keys macro
@@ -62,9 +63,6 @@ class CAROLQuery:
         # Create a session with connection pooling
         self._session = requests.Session()
         self._data = compressed_json
-
-        # Opening JSON file with all values
-        f = open('possible_values.json')
 
         #Creates an unfinished probe with rules to be added
         self._probe = {
@@ -103,8 +101,11 @@ class CAROLQuery:
             "SortDescending": True
         }
         
-        self.result_list_count = None
-        self.max_result_count_reached = None
+        self._result_list_count = None
+        self._max_result_count_reached = None
+        self._date_constraints = []
+        self._general_constraints = []
+        self._values = []
         
     def __del__(self):
         self._session.close()
@@ -124,7 +125,7 @@ class CAROLQuery:
             condition = "contains"
             input_t = self._data[field][subfield]["input"]
             
-        self._values = values
+        self._values.append(values)
 
         rule =  {
             "RuleType": "Simple",
@@ -169,7 +170,7 @@ class CAROLQuery:
         # Send the probe POST request
         response = None
         try:
-            with sem:
+            with query_lock:
                 # avoids erroring concurrent api requests
                 time.sleep(0.3)
             # print query parameters currently working on
@@ -198,11 +199,11 @@ class CAROLQuery:
             response_json = response.json()
 
             # Extract the 'ResultListCount' and 'MaxResultCountReached' values
-            self.result_list_count = response_json['ResultListCount']
-            self.max_result_count_reached = response_json['MaxResultCountReached']
+            self._result_list_count = response_json['ResultListCount']
+            self._max_result_count_reached = response_json['MaxResultCountReached']
 
-            print(f'Result count: {self.result_list_count}')
-            print(f'Max reached: {self.max_result_count_reached}\n')
+            print(f'Result count: {self._result_list_count}')
+            print(f'Max reached: {self._max_result_count_reached}\n')
 
     def download(self):
         """Sends a download probe to the CAROL database.
@@ -249,7 +250,7 @@ class CAROLQuery:
                 print("No Content-Disposition header found.")
                 
             # lock critical section for multiprocessing
-            with lock:
+            with download_lock:
                 # Create the output directory if it doesn't exist
                 os.makedirs('./output', exist_ok=True)
 
@@ -287,9 +288,9 @@ def query_decide(value: str):
     cond_date_regex = r'(.+?)? ?(\d{1,2}[\/|-]\d{1,2}[\/|-]\d{2,4})'
     
     match = re.match(cond_date_regex, value)
-    if match.group(1):
+    if match and match.group(1):
         return "Event", "EventDate", match.group(1), to_standard_date_format(match.group(2))
-    elif match.group(2):
+    elif match and match.group(2):
         return "Event", "EventDate", "is after", to_standard_date_format(match.group(2))
 
     return "Narrative", "Factual", "contains", value
@@ -548,31 +549,42 @@ def divide_into_month_segments(time_periods):
 
     return month_segments
 
-def format_segments_as_constraints(segments):
+def format_segments_as_constraints(segments, general_constraints, download, requireAll):
+    
     constraints = []
-
     for segment in segments:
         start_date, end_date = segment
-        constraints.append((f"is on or after {start_date.strftime('%m/%d/%Y')}", f"is on or before {end_date.strftime('%m/%d/%Y')}"))
+        date_tuple = (f"is on or after {start_date.strftime('%m/%d/%Y')}", f"is on or before {end_date.strftime('%m/%d/%Y')}")
+        
+        # Convert the tuple to a list
+        extended_list = list(date_tuple)
 
-    return constraints
+        # Extend the list with elements from the other list
+        extended_list.extend(general_constraints) 
 
-def process_segment(segment):
-    query(segment[0], segment[1], download=True, requireAll=True)
+        # Convert the extended list back to a tuple
+        constraints.append(tuple(extended_list))
+    
+    kwargs = {'download': download, 'requireAll': requireAll}
 
-def query(*args, download = False, requireAll = True):
+    return constraints, kwargs
+
+# def process_segment(segment):
+#     submit_query(segment[0], segment[1], download=True, requireAll=True)
+    
+def submit_query(*args, **kwargs):
     """A one-time query to the CAROL Database.
     The queries are input as a list of tuples or strings.
     """
 
-    #If no arguments, raise ValueError
+    # If no arguments, raise ValueError
     if len(args) == 0:
         raise ValueError("No queries found")
 
-    #Query class
+    # Query class
     q = CAROLQuery()
 
-    #Sorts through the args
+    # Sorts through the args
     for arg in args:
         field, subfield, condition, value = query_rule_sort(arg)
         
@@ -590,71 +602,77 @@ def query(*args, download = False, requireAll = True):
         if len(e_list):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
 
-        #Add query rule from args
-        q.addQueryRule(field, subfield, condition, value, requireAll)
-
-    #Run the query
+        # Add query rule from args
+        q.addQueryRule(field, subfield, condition, value, kwargs['requireAll'])
+            
+    # Run the query
     q.query()
 
-    #Download query
-    if (download and q.result_list_count > 0):
+    # Download query
+    if (kwargs['download'] and q._result_list_count > 0):
         q.download()
     
-    #Return query object
+    # Return query object
     return q
 
-if __name__ == '__main__':
-    # Sample random queries
-        # query("engine power", datetime.today() - timedelta(days=1), datetime.today())
-        # query('How many airplanes crash because of airplane failure'
-        
-    # query(("engine power", "Narrative", "Factual", "contains"))
-    # query("1/1/13")
-    # query("is on or after 1/1/13", "is before 1/1/14", download=True, requireAll=True)
-    # query(("Analysis Narrative", "does not contain", "alcohol"))
-    # query(("fire", "after 1/1/13", "before 1/1/14"))
-    constraints = [
-    # 'is on or after 10/24/1948',
-    'is on or after 1/1/2020',
-    'is before 3/1/2022',
-    # 'is before 6/3/2017',
-    # 'is 6/6/2013',
-    # 'is not 6/6/2020',
-    # 'is not 1/1/1995',
-    # 'is 10/24/1950',
-    # 'is after 3/14/2013',
-    # 'is on or before 4/12/2013'
-    ]
-        
-    # time_periods = generate_time_periods_and(constraints)
-    time_periods = generate_time_periods_and(constraints)
+def query(*args, download = False, requireAll = True):
+    """A one-time query to the CAROL Database.
+    The queries are input as a list of tuples or strings.
+    """
 
-    for period in time_periods:
-        period_start, period_end = period
-        print(f"{period_start.strftime('%m/%d/%Y')} - {period_end.strftime('%m/%d/%Y')}")
+    # If no arguments, raise ValueError
+    if len(args) == 0:
+        raise ValueError("No queries found")
+
+    # Query class
+    q = CAROLQuery()
+
+    # Sorts through the args
+    for arg in args:
+        field, subfield, condition, value = query_rule_sort(arg)
         
+        #Check to make sure all query parameters were filled
+        e_list = []
+        if not field:
+            e_list.append("Field")
+        if not subfield and field != "HasSafetyRec":
+            e_list.append("Subfield")
+        if not condition:
+            e_list.append("Condition")
+        if not value:
+            e_list.append("Value")
+            
+        if len(e_list):
+            raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
+
+        if subfield == "EventDate":
+            q._date_constraints.append(arg)
+        else:
+            q._general_constraints.append(arg)
+    
+    # generate time periods correlating with date constraints
+    time_periods = []
+    if requireAll:
+        time_periods = generate_time_periods_and(q._date_constraints)
+    else:
+        time_periods = generate_time_periods_or(q._date_constraints)
+    
     segments = divide_into_month_segments(time_periods)
 
-    print()
-    for period in segments:
-        period_start, period_end = period
-        print(f"{period_start.strftime('%m/%d/%Y')} - {period_end.strftime('%m/%d/%Y')}")
-        
-    query_segments = format_segments_as_constraints(segments)
-    
-    # Max number of concurrent processes for probe query
-    max_concurrent_processes = 1
+    query_segments, kwargs = format_segments_as_constraints(segments, q._general_constraints, download, requireAll)
             
     # Create a multiprocessing Pool with the desired number of processes
     num_processes = cpu_count()  # Use all available CPU cores
-    l = Lock()
-    s = Semaphore(max_concurrent_processes)
-    pool = Pool(initializer=init, initargs=(l,s), processes=num_processes)
+    ql = Lock() # query lock
+    dl = Lock() # download lock
+    pool = Pool(initializer=init, initargs=(ql,dl), processes=num_processes)
     
     start_time = time.time()
     
-    # Use the map function to distribute the segments among processes
-    pool.map(process_segment, query_segments)
+    # # Use the map function to distribute the segments among processes
+    # pool.map(process_segment, query_segments)
+    with pool as p:
+        p.starmap(partial(submit_query, **kwargs), query_segments)
 
     # Close the pool to free up resources
     pool.close()
@@ -668,3 +686,69 @@ if __name__ == '__main__':
     execution_time = end_time - start_time
 
     print(f"Execution time: {execution_time:.6f} seconds")
+
+if __name__ == '__main__':
+    # Sample random queries
+        # query("engine power", datetime.today() - timedelta(days=1), datetime.today())
+        # query('How many airplanes crash because of airplane failure'
+        
+    # query(("engine power", "Narrative", "Factual", "contains"))
+    # query("1/1/13")
+    query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, requireAll=True)
+    # query(("Analysis Narrative", "does not contain", "alcohol"))
+    # query(("fire", "after 1/1/13", "before 1/1/14"))
+    # constraints = [
+    # # 'is on or after 10/24/1948',
+    # 'is on or after 1/1/2020',
+    # 'is before 3/1/2022',
+    # # 'is before 6/3/2017',
+    # # 'is 6/6/2013',
+    # # 'is not 6/6/2020',
+    # # 'is not 1/1/1995',
+    # # 'is 10/24/1950',
+    # # 'is after 3/14/2013',
+    # # 'is on or before 4/12/2013'
+    # ]
+        
+    # # time_periods = generate_time_periods_and(constraints)
+    # time_periods = generate_time_periods_and(constraints)
+
+    # for period in time_periods:
+    #     period_start, period_end = period
+    #     print(f"{period_start.strftime('%m/%d/%Y')} - {period_end.strftime('%m/%d/%Y')}")
+        
+    # segments = divide_into_month_segments(time_periods)
+
+    # print()
+    # for period in segments:
+    #     period_start, period_end = period
+    #     print(f"{period_start.strftime('%m/%d/%Y')} - {period_end.strftime('%m/%d/%Y')}")
+        
+    # query_segments = format_segments_as_constraints(segments)
+    
+    # # Max number of concurrent processes for probe query
+    # max_concurrent_processes = 1
+            
+    # # Create a multiprocessing Pool with the desired number of processes
+    # num_processes = cpu_count()  # Use all available CPU cores
+    # l = Lock()
+    # s = Semaphore(max_concurrent_processes)
+    # pool = Pool(initializer=init, initargs=(l,s), processes=num_processes)
+    
+    # start_time = time.time()
+    
+    # # Use the map function to distribute the segments among processes
+    # pool.map(process_segment, query_segments)
+
+    # # Close the pool to free up resources
+    # pool.close()
+    # pool.join()  # Wait for all processes to finish
+    
+    # # for segment in query_segments:
+    # #     print(segment[0])
+    # #     process_segment(segment)
+    
+    # end_time = time.time()
+    # execution_time = end_time - start_time
+
+    # print(f"Execution time: {execution_time:.6f} seconds")
