@@ -39,11 +39,13 @@ for field in raw_json["fields"]:
             tmp1_dict[None]["values"].append(queryValue["value"])
 
 # multiprocessing lock init
-def init(ql,dl):
+def init(ql,dl,fl):
     global query_lock
     global download_lock
+    global file_lock
     query_lock = ql
     download_lock = dl
+    file_lock = fl
 
 class query_keys:
     """Query keys macro
@@ -172,7 +174,7 @@ class CAROLQuery:
         try:
             with query_lock:
                 # avoids erroring concurrent api requests
-                time.sleep(0.3)
+                time.sleep(0.5)
             # print query parameters currently working on
             print("Querying CAROL...")
             response = self._session.post(probe_url, json=self._probe, timeout=60)
@@ -212,6 +214,9 @@ class CAROLQuery:
         # Send the file POST request
         response = None
         try:
+            with download_lock:
+                # avoids erroring concurrent api requests
+                time.sleep(0.5)
             # print dots to signify working
             print(f"Downloading data from CAROL...")
             response = self._session.post(file_url, json=self._payload, timeout=60)
@@ -250,7 +255,7 @@ class CAROLQuery:
                 print("No Content-Disposition header found.")
                 
             # lock critical section for multiprocessing
-            with download_lock:
+            with file_lock:
                 # Create the output directory if it doesn't exist
                 os.makedirs('./output', exist_ok=True)
 
@@ -457,6 +462,10 @@ def generate_time_periods_or(constraints):
         else: # is but not within current period
             raise ValueError(f"Constraint is not formatted properly. It must include: 'is', 'is not', 'is on or before', 'is before', 'is on or after', or 'is after'.")
         
+    # check for only general constraints   
+    if len(constraints) == 0:
+        return [[start_date, datetime.today()]]
+    
     # check not condition
     if not_cond:
         if latest_before > not_cond or earliest_after < not_cond:
@@ -565,12 +574,9 @@ def format_segments_as_constraints(segments, general_constraints, download, requ
         # Convert the extended list back to a tuple
         constraints.append(tuple(extended_list))
     
-    kwargs = {'download': download, 'requireAll': requireAll}
+    kwargs = {'download': download, 'requireAll': True}
 
     return constraints, kwargs
-
-# def process_segment(segment):
-#     submit_query(segment[0], segment[1], download=True, requireAll=True)
     
 def submit_query(*args, **kwargs):
     """A one-time query to the CAROL Database.
@@ -665,7 +671,8 @@ def query(*args, download = False, requireAll = True):
     num_processes = cpu_count()  # Use all available CPU cores
     ql = Lock() # query lock
     dl = Lock() # download lock
-    pool = Pool(initializer=init, initargs=(ql,dl), processes=num_processes)
+    fl = Lock() # file lock
+    pool = Pool(initializer=init, initargs=(ql,dl,fl), processes=num_processes)
     
     start_time = time.time()
     
@@ -694,61 +701,7 @@ if __name__ == '__main__':
         
     # query(("engine power", "Narrative", "Factual", "contains"))
     # query("1/1/13")
-    query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, requireAll=True)
+    # query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, requireAll=False)
+    query("fire", "engine power", download=True, requireAll=False)
     # query(("Analysis Narrative", "does not contain", "alcohol"))
     # query(("fire", "after 1/1/13", "before 1/1/14"))
-    # constraints = [
-    # # 'is on or after 10/24/1948',
-    # 'is on or after 1/1/2020',
-    # 'is before 3/1/2022',
-    # # 'is before 6/3/2017',
-    # # 'is 6/6/2013',
-    # # 'is not 6/6/2020',
-    # # 'is not 1/1/1995',
-    # # 'is 10/24/1950',
-    # # 'is after 3/14/2013',
-    # # 'is on or before 4/12/2013'
-    # ]
-        
-    # # time_periods = generate_time_periods_and(constraints)
-    # time_periods = generate_time_periods_and(constraints)
-
-    # for period in time_periods:
-    #     period_start, period_end = period
-    #     print(f"{period_start.strftime('%m/%d/%Y')} - {period_end.strftime('%m/%d/%Y')}")
-        
-    # segments = divide_into_month_segments(time_periods)
-
-    # print()
-    # for period in segments:
-    #     period_start, period_end = period
-    #     print(f"{period_start.strftime('%m/%d/%Y')} - {period_end.strftime('%m/%d/%Y')}")
-        
-    # query_segments = format_segments_as_constraints(segments)
-    
-    # # Max number of concurrent processes for probe query
-    # max_concurrent_processes = 1
-            
-    # # Create a multiprocessing Pool with the desired number of processes
-    # num_processes = cpu_count()  # Use all available CPU cores
-    # l = Lock()
-    # s = Semaphore(max_concurrent_processes)
-    # pool = Pool(initializer=init, initargs=(l,s), processes=num_processes)
-    
-    # start_time = time.time()
-    
-    # # Use the map function to distribute the segments among processes
-    # pool.map(process_segment, query_segments)
-
-    # # Close the pool to free up resources
-    # pool.close()
-    # pool.join()  # Wait for all processes to finish
-    
-    # # for segment in query_segments:
-    # #     print(segment[0])
-    # #     process_segment(segment)
-    
-    # end_time = time.time()
-    # execution_time = end_time - start_time
-
-    # print(f"Execution time: {execution_time:.6f} seconds")
