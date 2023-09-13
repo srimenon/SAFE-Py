@@ -8,6 +8,7 @@ import calendar
 import time
 from multiprocessing import Pool, Lock, cpu_count
 from functools import partial
+import copy
 
 # Define the URL
 probe_url = "https://data.ntsb.gov/carol-main-public/api/Query/Main"
@@ -78,7 +79,7 @@ class CAROLQuery:
                     "editedSinceLastSearch": False
                 }
             ],
-            "AndOr": "and",
+            "AndOr": "or",
             "SortColumn": None,
             "SortDescending": True,
             "TargetCollection": "cases",
@@ -95,7 +96,7 @@ class CAROLQuery:
                     "editedSinceLastSearch": False
                 }
             ],
-            "AndOr": "and",
+            "AndOr": "or",
             "TargetCollection": "cases",
             "ExportFormat": "summary",
             "SessionId": 100000,
@@ -103,11 +104,20 @@ class CAROLQuery:
             "SortDescending": True
         }
         
+        self._query_group = {
+            "QueryRules": [],
+            "AndOr": "and",
+            "inLastSearch": False,
+            "editedSinceLastSearch": False
+        }
+        
+        self._curr_group_index = 0
         self._result_list_count = None
         self._max_result_count_reached = None
         self._date_constraints = []
         self._general_constraints = []
         self._values = []
+        self._used_rule_sets = []
         
     def __del__(self):
         self._session.close()
@@ -117,10 +127,8 @@ class CAROLQuery:
         """
         if condition and subfield and field:
             input_t = self._data[field][subfield]["input"]
-
         elif field == "HasSafetyRec":
             input_t = self._data[field][subfield]["input"]
-
         else:
             field = "Narrative"
             subfield = "Factual"
@@ -148,14 +156,46 @@ class CAROLQuery:
             "overrideColumn": ""
         }
         
-        if andOr:
-            self._probe["QueryGroups"][0]["AndOr"] = "and"
-            self._payload["QueryGroups"][0]["AndOr"] = "and"
-        else:
-            self._probe["QueryGroups"][0]["AndOr"] = "or"
-            self._payload["QueryGroups"][0]["AndOr"] = "or"
-        self._probe["QueryGroups"][0]["QueryRules"].append(rule)
-        self._payload["QueryGroups"][0]["QueryRules"].append(rule)
+        # the current number of groups - 1
+        self._curr_group_index = len(self._probe["QueryGroups"]) - 1
+        
+        # if "or" logic and not the first rule
+        if not andOr:
+            # if we already have a rule in the current query group
+            if len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) > 2 and subfield != "EventDate": # fire
+                self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
+                self._payload["QueryGroups"].append(copy.deepcopy(self._query_group))
+                # update group count
+                self._curr_group_index = len(self._probe["QueryGroups"]) - 1 # 1
+                # add the constraint to gen list
+                self._general_constraints.append(rule) # general_const = ['fire', 'snow']             
+            elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 0 and subfield == "EventDate" and condition == "is on or after":
+                self._query_group["QueryRules"].append(rule)
+            elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 1 and subfield == "EventDate" and condition == "is on or before":
+                self._query_group["QueryRules"].append(rule)
+            elif subfield != "EventDate":
+                self._general_constraints.append(rule) # general_const = ['fire']  
+                    
+        # append the rule to the probe and the download payload
+        self._probe["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
+        self._payload["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
+        
+        # check general constraints
+        if not andOr and len(self._general_constraints) >= 2:
+            # then we need to add a group for each combination of constraints
+            for rule_set in powerset(self._general_constraints):
+                if rule_set not in self._used_rule_sets:
+                    self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
+                    self._payload["QueryGroups"].append(copy.deepcopy(self._query_group))
+                    # update group count
+                    self._curr_group_index = len(self._probe["QueryGroups"]) - 1 # 1
+                    for rule in rule_set:
+                        # append the rule to the probe and the download payload
+                        self._probe["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
+                        self._payload["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
+                    self._used_rule_sets.append(rule_set)
+
+        # print(self._probe)
 
     def clear(self):
         """Clears existing query rules.
@@ -174,9 +214,10 @@ class CAROLQuery:
         try:
             with query_lock:
                 # avoids erroring concurrent api requests
-                time.sleep(0.5)
+                time.sleep(2)
             # print query parameters currently working on
             print("Querying CAROL...")
+            print(f"Query for {self._values}")
             response = self._session.post(probe_url, json=self._probe, timeout=60)
                 
         except requests.exceptions.Timeout:
@@ -216,7 +257,7 @@ class CAROLQuery:
         try:
             with download_lock:
                 # avoids erroring concurrent api requests
-                time.sleep(0.5)
+                time.sleep(2)
             # print dots to signify working
             print(f"Downloading data from CAROL...")
             response = self._session.post(file_url, json=self._payload, timeout=60)
@@ -558,7 +599,21 @@ def divide_into_month_segments(time_periods):
 
     return month_segments
 
-def format_segments_as_constraints(segments, general_constraints, download, requireAll):
+def powerset(rules):
+    """
+    Generate the powerset of a list of rule objects without singletons.
+    """
+    n = len(rules)
+    powerset_list = []
+
+    for i in range(2 ** n):
+        subset = [rules[j] for j in range(n) if (i & (1 << j)) != 0]
+        if len(subset) > 1:  # Exclude singletons
+            powerset_list.append(subset)
+
+    return powerset_list
+
+def format_segments_as_constraints_and(segments, general_constraints, download, require_all):
     
     constraints = []
     for segment in segments:
@@ -574,14 +629,20 @@ def format_segments_as_constraints(segments, general_constraints, download, requ
         # Convert the extended list back to a tuple
         constraints.append(tuple(extended_list))
     
-    kwargs = {'download': download, 'requireAll': True}
+    kwargs = {'download': download, 'require_all': require_all}
 
     return constraints, kwargs
     
-def submit_query(*args, **kwargs):
+def submit_query(progress_bar: tqdm, *args, **kwargs):
     """A one-time query to the CAROL Database.
     The queries are input as a list of tuples or strings.
     """
+    
+    #### For and queries ####
+    # args = ('startdate', 'enddate', 'fire', 'engine power', 'snow')
+    
+    #### For or queries ####
+    # args = ('startdate', 'enddate', 'fire', 'engine power', 'snow')
 
     # If no arguments, raise ValueError
     if len(args) == 0:
@@ -609,8 +670,11 @@ def submit_query(*args, **kwargs):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
 
         # Add query rule from args
-        q.addQueryRule(field, subfield, condition, value, kwargs['requireAll'])
-            
+        q.addQueryRule(field, subfield, condition, value, kwargs['require_all'])
+
+    # add "or" or "and" to values
+    q._values.append(f"require_all = {kwargs['require_all']}")
+    
     # Run the query
     q.query()
 
@@ -621,17 +685,17 @@ def submit_query(*args, **kwargs):
     # Return query object
     return q
 
-def query(*args, download = False, requireAll = True):
+def query(*args, download = False, require_all = True):
     """A one-time query to the CAROL Database.
     The queries are input as a list of tuples or strings.
     """
+    
+    date_constraints = []
+    general_constraints = []
 
     # If no arguments, raise ValueError
     if len(args) == 0:
         raise ValueError("No queries found")
-
-    # Query class
-    q = CAROLQuery()
 
     # Sorts through the args
     for arg in args:
@@ -650,23 +714,23 @@ def query(*args, download = False, requireAll = True):
             
         if len(e_list):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
-
+        
         if subfield == "EventDate":
-            q._date_constraints.append(arg)
+            date_constraints.append(arg)
         else:
-            q._general_constraints.append(arg)
+            general_constraints.append(arg)
     
     # generate time periods correlating with date constraints
     time_periods = []
-    if requireAll:
-        time_periods = generate_time_periods_and(q._date_constraints)
+    if require_all:
+        time_periods = generate_time_periods_and(date_constraints)
     else:
-        time_periods = generate_time_periods_or(q._date_constraints)
+        time_periods = generate_time_periods_or(date_constraints)
     
     segments = divide_into_month_segments(time_periods)
 
-    query_segments, kwargs = format_segments_as_constraints(segments, q._general_constraints, download, requireAll)
-            
+    query_segments, kwargs = format_segments_as_constraints_and(segments, general_constraints, download, require_all)
+                
     # Create a multiprocessing Pool with the desired number of processes
     num_processes = cpu_count()  # Use all available CPU cores
     ql = Lock() # query lock
@@ -676,8 +740,7 @@ def query(*args, download = False, requireAll = True):
     
     start_time = time.time()
     
-    # # Use the map function to distribute the segments among processes
-    # pool.map(process_segment, query_segments)
+    # Use the map function to distribute the segments among processes
     with pool as p:
         p.starmap(partial(submit_query, **kwargs), query_segments)
 
@@ -701,7 +764,7 @@ if __name__ == '__main__':
         
     # query(("engine power", "Narrative", "Factual", "contains"))
     # query("1/1/13")
-    # query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, requireAll=False)
-    query("fire", "engine power", download=True, requireAll=False)
+    # query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, require_all=False)
+    query("fire", "engine power", download=True, require_all=False)
     # query(("Analysis Narrative", "does not contain", "alcohol"))
     # query(("fire", "after 1/1/13", "before 1/1/14"))
