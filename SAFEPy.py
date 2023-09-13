@@ -9,6 +9,7 @@ import time
 from multiprocessing import Pool, Lock, cpu_count
 from functools import partial
 import copy
+import spacy
 
 # Define the URL
 probe_url = "https://data.ntsb.gov/carol-main-public/api/Query/Main"
@@ -47,6 +48,9 @@ def init(ql,dl,fl):
     query_lock = ql
     download_lock = dl
     file_lock = fl
+
+class MalformedQueryError(Exception):
+    pass
 
 class query_keys:
     """Query keys macro
@@ -328,11 +332,35 @@ def to_standard_date_format(date_str):
     
     return None
 
+def has_subject_and_verb(text):
+    nlp = spacy.load("en_core_web_sm")
+    doc = nlp(text)
+    
+    # Check if the document contains at least one verb and one subject
+    has_verb = any(token.pos_ in ["VERB", "AUX"] for token in doc)
+    has_subject = any(token.dep_ == "nsubj" for token in doc)
+    
+    return has_verb and has_subject
+
 def query_decide(value: str):
     """Using pattern matching, decides which field, subfield, and condition an arbitrary value falls under.
     """
+
+    # Checks for full sentence
+    if has_subject_and_verb(value):
+        while True:
+            user_input = input(f"Your input was: {value}\nFull sentences input to SAFEPy will search for the string in the Factual Narrative. Continue? (yes/no): ")
+            normalized_input = user_input.lower().strip()
+
+            # Check if user_input is "yes" (case-insensitive)
+            if normalized_input == "no" or normalized_input == "n":
+                raise MalformedQueryError("Aborting the query. Reformat and try again.")
+            elif normalized_input == "yes" or normalized_input == "y":
+                break
+            else:
+                print("Invalid input. Please enter 'yes' or 'no'.")
+    # Date decision
     cond_date_regex = r'(.+?)? ?(\d{1,2}[\/|-]\d{1,2}[\/|-]\d{2,4})'
-    
     match = re.match(cond_date_regex, value)
     if match and match.group(1):
         return "Event", "EventDate", match.group(1), to_standard_date_format(match.group(2))
@@ -637,16 +665,6 @@ def submit_query(*args, **kwargs):
     """A one-time query to the CAROL Database.
     The queries are input as a list of tuples or strings.
     """
-    
-    #### For and queries ####
-    # args = ('startdate', 'enddate', 'fire', 'engine power', 'snow')
-    
-    #### For or queries ####
-    # args = ('startdate', 'enddate', 'fire', 'engine power', 'snow')
-
-    # If no arguments, raise ValueError
-    if len(args) == 0:
-        raise ValueError("No queries found")
 
     # Query class
     q = CAROLQuery()
@@ -654,20 +672,6 @@ def submit_query(*args, **kwargs):
     # Sorts through the args
     for arg in args:
         field, subfield, condition, value = query_rule_sort(arg)
-        
-        #Check to make sure all query parameters were filled
-        e_list = []
-        if not field:
-            e_list.append("Field")
-        if not subfield and field != "HasSafetyRec":
-            e_list.append("Subfield")
-        if not condition:
-            e_list.append("Condition")
-        if not value:
-            e_list.append("Value")
-            
-        if len(e_list):
-            raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
 
         # Add query rule from args
         q.addQueryRule(field, subfield, condition, value, kwargs['require_all'])
@@ -701,7 +705,7 @@ def query(*args, download = False, require_all = True):
     for arg in args:
         field, subfield, condition, value = query_rule_sort(arg)
         
-        #Check to make sure all query parameters were filled
+        # Check to make sure all query parameters were filled
         e_list = []
         if not field:
             e_list.append("Field")
@@ -759,12 +763,14 @@ def query(*args, download = False, require_all = True):
 
 if __name__ == '__main__':
     # Sample random queries
-        # query("engine power", datetime.today() - timedelta(days=1), datetime.today())
-        # query('How many airplanes crash because of airplane failure'
+        query("engine power", datetime.today() - timedelta(days=1), datetime.today())
+        # query('How many airplanes crash because of airplane failure?')
+        # query()
         
     # query(("engine power", "Narrative", "Factual", "contains"))
     # query("1/1/13")
     # query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, require_all=False)
-    query("fire", "engine power", download=True, require_all=False)
+    # query("fire", "engine power", download=True, require_all=False)
+    
     # query(("Analysis Narrative", "does not contain", "alcohol"))
     # query(("fire", "after 1/1/13", "before 1/1/14"))
