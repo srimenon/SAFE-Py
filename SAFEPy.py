@@ -633,7 +633,7 @@ def format_segments_as_constraints_and(segments, general_constraints, download, 
 
     return constraints, kwargs
     
-def submit_query(progress_bar: tqdm, *args, **kwargs):
+def submit_query(*args, **kwargs):
     """A one-time query to the CAROL Database.
     The queries are input as a list of tuples or strings.
     """
