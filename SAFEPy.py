@@ -3,6 +3,7 @@ import zipfile
 import os
 import json
 import re
+from dateutil import parser
 from datetime import datetime, timedelta
 import calendar
 import time
@@ -324,18 +325,11 @@ class CAROLQuery:
                 os.remove(f'./output/{folder}.zip')
             
 def to_standard_date_format(date_str):
-    input_formats = [
-        '%m/%d/%y', '%m-%d-%y', '%d/%m/%y', '%d-%m-%y',
-        '%m/%d/%Y', '%m-%d-%Y', '%d/%m/%Y', '%d-%m-%Y',
-    ]
-    output_format = '%Y-%m-%d'
-    
-    for format_str in input_formats:
-        try:
-            date_obj = datetime.strptime(date_str, format_str)
-            return date_obj.strftime(output_format)
-        except ValueError:
-            pass
+    try:
+        date_obj = parser.parse(date_str)
+        return date_obj.strftime('%Y-%m-%d')
+    except ValueError:
+        pass
     
     return None
 
@@ -366,13 +360,16 @@ def query_decide(value: str):
                 break
             else:
                 print("Invalid input. Please enter 'yes' or 'no'.")
-    # Date decision
+    
+    # Date decision with greedy check (for things like 'today')
+    if parser.parse(value, fuzzy=True):
+        print(parser.parse(value, fuzzy=True))
     cond_date_regex = r'(.+?)? ?(\d{1,2}[\/|-]\d{1,2}[\/|-]\d{2,4})'
     match = re.match(cond_date_regex, value)
     if match and match.group(1):
         return "Event", "EventDate", match.group(1), to_standard_date_format(match.group(2))
     elif match and match.group(2):
-        return "Event", "EventDate", "is after", to_standard_date_format(match.group(2))
+        return "Event", "EventDate", "is on or after", to_standard_date_format(match.group(2))
 
     return "Narrative", "Factual", "contains", value
 
@@ -732,7 +729,7 @@ def query(*args, download = False, require_all = True):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
         
         if subfield == "EventDate":
-            date_constraints.append(value)
+            date_constraints.append(f'{condition} {value}')
         else:
             general_constraints.append(rule)
     
@@ -780,7 +777,7 @@ if __name__ == '__main__':
         # query()
         
     # query(("engine power", "Narrative", "Factual", "contains"))
-    query("1/1/13")
+    query('1 \ 1 \ 13')
     # query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, require_all=False)
     # query("fire", "engine power", download=True, require_all=False)
     
