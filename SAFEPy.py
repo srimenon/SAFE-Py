@@ -134,6 +134,22 @@ class CAROLQuery:
     def __del__(self):
         self._session.close()
 
+    def addQueryGroup(self, rule, condition, subfield):
+        # if we already have a rule in the current query group
+        if len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) > 2 and subfield != "EventDate":
+            self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
+            self._payload["QueryGroups"].append(copy.deepcopy(self._query_group))
+            # update group count
+            self._curr_group_index = len(self._probe["QueryGroups"]) - 1
+            # add the constraint to gen list
+            self._general_constraints.append(rule)             
+        elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 0 and subfield == "EventDate" and condition == "is on or after":
+            self._query_group["QueryRules"].append(rule)
+        elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 1 and subfield == "EventDate" and condition == "is on or before":
+            self._query_group["QueryRules"].append(rule)
+        elif subfield != "EventDate":
+            self._general_constraints.append(rule)
+
     def addQueryRule(self, field, subfield, condition, values, andOr):
         """Adds a query rule to the CAROLQuery class.
         """
@@ -173,41 +189,11 @@ class CAROLQuery:
         
         # if "or" logic and not the first rule
         if not andOr:
-            # if we already have a rule in the current query group
-            if len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) > 2 and subfield != "EventDate": # fire
-                self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
-                self._payload["QueryGroups"].append(copy.deepcopy(self._query_group))
-                # update group count
-                self._curr_group_index = len(self._probe["QueryGroups"]) - 1 # 1
-                # add the constraint to gen list
-                self._general_constraints.append(rule) # general_const = ['fire', 'snow']             
-            elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 0 and subfield == "EventDate" and condition == "is on or after":
-                self._query_group["QueryRules"].append(rule)
-            elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 1 and subfield == "EventDate" and condition == "is on or before":
-                self._query_group["QueryRules"].append(rule)
-            elif subfield != "EventDate":
-                self._general_constraints.append(rule) # general_const = ['fire']  
+            self.addQueryGroup(rule, condition, subfield)
                     
         # append the rule to the probe and the download payload
         self._probe["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
         self._payload["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
-        
-        # check general constraints
-        if not andOr and len(self._general_constraints) >= 2:
-            # then we need to add a group for each combination of constraints
-            for rule_set in powerset(self._general_constraints):
-                if rule_set not in self._used_rule_sets:
-                    self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
-                    self._payload["QueryGroups"].append(copy.deepcopy(self._query_group))
-                    # update group count
-                    self._curr_group_index = len(self._probe["QueryGroups"]) - 1 # 1
-                    for rule in rule_set:
-                        # append the rule to the probe and the download payload
-                        self._probe["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
-                        self._payload["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
-                    self._used_rule_sets.append(rule_set)
-
-        # print(self._probe)
 
     def clear(self):
         """Clears existing query rules.
@@ -324,14 +310,18 @@ class CAROLQuery:
                 # remove the zip file
                 os.remove(f'./output/{folder}.zip')
             
-def to_standard_date_format(date_str):
+def to_standard_date_format(cond_str, date_str):
     try:
         date_obj = parser.parse(date_str)
+        print(f"Detected condition: {cond_str.strip()}\n" + 
+            f"Detected date: {date_str}\n" +
+            f"Adding date condition to query.")
         return date_obj.strftime('%Y-%m-%d')
-    except ValueError:
-        pass
-    
-    return None
+    except:
+        raise ValueError(f"\nDetected condition: {cond_str.strip()}\n" + 
+            f"Detected date: {date_str}\n" + 
+            f"Valid conditions are: is on or before, is on or after, is before, is after, is, is not\n" +
+            "Date condition is not in a valid format. Please enter dates in the following format: '<condition> mm/dd/yyyy'.")
 
 def has_subject_and_verb(text):
     nlp = spacy.load("en_core_web_sm")
@@ -362,16 +352,24 @@ def query_decide(value: str):
                 print("Invalid input. Please enter 'yes' or 'no'.")
     
     # Date decision with greedy check (for things like 'today')
-    if parser.parse(value, fuzzy=True):
-        print(parser.parse(value, fuzzy=True))
-    cond_date_regex = r'(.+?)? ?(\d{1,2}[\/|-]\d{1,2}[\/|-]\d{2,4})'
-    match = re.match(cond_date_regex, value)
-    if match and match.group(1):
-        return "Event", "EventDate", match.group(1), to_standard_date_format(match.group(2))
-    elif match and match.group(2):
-        return "Event", "EventDate", "is on or after", to_standard_date_format(match.group(2))
+    normalized_value = value.lower().strip()
+    try:
+        parsed_date = parser.parse(normalized_value)
+        print(f"Using default condition: is on or after\n" + 
+            f"Detected date: {parsed_date}\n" +
+            f"Adding date condition to query.")
+        return "Event", "EventDate", "is on or after", parsed_date
+    except:
+        pass
 
-    return "Narrative", "Factual", "contains", value
+    # Date decision for dates including 'is on or before', ...
+    cond_date_regex = r'^(is(?:(?: on or)?(?: before| after)| not)?) (.+)+$'
+    match = re.match(cond_date_regex, normalized_value)
+    if match:
+        return "Event", "EventDate", match.group(1), to_standard_date_format(match.group(1), match.group(2))
+    else:
+        print(f"Searching factual narrative for: {normalized_value}")
+        return "Narrative", "Factual", "contains", normalized_value
 
 def query_key_sort(value):
     str_methods = [str, str.lower, str.capitalize, str.upper]
@@ -777,9 +775,10 @@ if __name__ == '__main__':
         # query()
         
     # query(("engine power", "Narrative", "Factual", "contains"))
-    query('1 \ 1 \ 13')
+    # query('is on or before today')
+    # query('is today')
     # query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, require_all=False)
-    # query("fire", "engine power", download=True, require_all=False)
+    query("fire", "engine power", download=True, require_all=False)
     
     # query(("Analysis Narrative", "does not contain", "alcohol"))
     # query(("fire", "after 1/1/13", "before 1/1/14"))
