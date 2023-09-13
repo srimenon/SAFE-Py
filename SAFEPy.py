@@ -61,6 +61,13 @@ class query_keys:
     conditions = set([condition for field in fields for subfield in compressed_json[field] for condition in compressed_json[field][subfield]["conditions"]])
     values = set([condition for field in fields for subfield in compressed_json[field] for condition in compressed_json[field][subfield]["values"]])
 
+class query_rule:
+    def __init__(self, field=None, subfield=None, condition=None, value=None):
+        self.field = field
+        self.subfield = subfield
+        self.condition = condition
+        self.value = value
+
 class CAROLQuery:
     """CAROL Query class
     Builds queries using a set of rules and then probes the CAROL database to find results that match its query.
@@ -371,7 +378,6 @@ def query_decide(value: str):
 
 def query_key_sort(value):
     str_methods = [str, str.lower, str.capitalize, str.upper]
-    is_matched = False
     for m in str_methods:
         value = m(value)
         if value in query_keys.fields:
@@ -395,7 +401,7 @@ def query_rule_sort(arg):
     elif (len(arg) == 2):
         pass
 
-    #If three argument found
+    #If three arguments found
     elif (len(arg) == 3):
         arg_list = list(arg)
         tmp = []
@@ -437,7 +443,7 @@ def generate_time_periods_and(constraints):
         
         # extract condition date
         parts = constraint.split()
-        condition_date = datetime.strptime(parts[-1], '%m/%d/%Y')
+        condition_date = datetime.strptime(parts[-1], '%Y-%m-%d')
         
         # check condition date bounds
         if condition_date < start_date or datetime.today() < condition_date:
@@ -641,17 +647,21 @@ def powerset(rules):
 
     return powerset_list
 
-def format_segments_as_constraints_and(segments, general_constraints, download, require_all):
+def format_segments_as_constraints(segments, general_constraints, download, require_all):
     
     constraints = []
     for segment in segments:
+        
+        # Create a tuple of query rules for the start and end dates
         start_date, end_date = segment
-        date_tuple = (f"is on or after {start_date.strftime('%m/%d/%Y')}", f"is on or before {end_date.strftime('%m/%d/%Y')}")
+        start_query_rule = query_rule("Event", "EventDate", "is on or after", start_date.strftime('%m/%d/%Y'))
+        end_query_rule = query_rule("Event", "EventDate", "is on or before", end_date.strftime('%m/%d/%Y'))
+        date_tuple = (start_query_rule, end_query_rule)
         
         # Convert the tuple to a list
         extended_list = list(date_tuple)
 
-        # Extend the list with elements from the other list
+        # Extend the list with elements from general constraints
         extended_list.extend(general_constraints) 
 
         # Convert the extended list back to a tuple
@@ -670,11 +680,10 @@ def submit_query(*args, **kwargs):
     q = CAROLQuery()
 
     # Sorts through the args
-    for arg in args:
-        field, subfield, condition, value = query_rule_sort(arg)
+    for rule in args:
 
         # Add query rule from args
-        q.addQueryRule(field, subfield, condition, value, kwargs['require_all'])
+        q.addQueryRule(rule.field, rule.subfield, rule.condition, rule.value, kwargs['require_all'])
 
     # add "or" or "and" to values
     q._values.append(f"require_all = {kwargs['require_all']}")
@@ -705,6 +714,9 @@ def query(*args, download = False, require_all = True):
     for arg in args:
         field, subfield, condition, value = query_rule_sort(arg)
         
+        # create query_rule object
+        rule = query_rule(field, subfield, condition, value)
+        
         # Check to make sure all query parameters were filled
         e_list = []
         if not field:
@@ -720,9 +732,9 @@ def query(*args, download = False, require_all = True):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
         
         if subfield == "EventDate":
-            date_constraints.append(arg)
+            date_constraints.append(value)
         else:
-            general_constraints.append(arg)
+            general_constraints.append(rule)
     
     # generate time periods correlating with date constraints
     time_periods = []
@@ -733,7 +745,7 @@ def query(*args, download = False, require_all = True):
     
     segments = divide_into_month_segments(time_periods)
 
-    query_segments, kwargs = format_segments_as_constraints_and(segments, general_constraints, download, require_all)
+    query_segments, kwargs = format_segments_as_constraints(segments, general_constraints, download, require_all)
                 
     # Create a multiprocessing Pool with the desired number of processes
     num_processes = cpu_count()  # Use all available CPU cores
@@ -763,12 +775,12 @@ def query(*args, download = False, require_all = True):
 
 if __name__ == '__main__':
     # Sample random queries
-        query("engine power", datetime.today() - timedelta(days=1), datetime.today())
+        # query("engine power", datetime.today() - timedelta(days=1), datetime.today())
         # query('How many airplanes crash because of airplane failure?')
         # query()
         
     # query(("engine power", "Narrative", "Factual", "contains"))
-    # query("1/1/13")
+    query("1/1/13")
     # query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, require_all=False)
     # query("fire", "engine power", download=True, require_all=False)
     
