@@ -7,10 +7,11 @@ from dateutil import parser
 from datetime import datetime, timedelta
 import calendar
 import time
-from multiprocessing import Pool, Lock, cpu_count
+from multiprocessing import Manager, Pool, Lock, cpu_count
 from functools import partial
 import copy
 import spacy
+import pandas as pd
 
 # Define the URL
 probe_url = "https://data.ntsb.gov/carol-main-public/api/Query/Main"
@@ -95,7 +96,7 @@ class CAROLQuery:
             "SortColumn": None,
             "SortDescending": True,
             "TargetCollection": "cases",
-            "SessionId": 100000
+            "SessionId": 1001000
         }
 
         #Creates an unfinished payload (download probe) with rules to be added
@@ -111,7 +112,7 @@ class CAROLQuery:
             "AndOr": "or",
             "TargetCollection": "cases",
             "ExportFormat": "summary",
-            "SessionId": 100000,
+            "SessionId": 100100,
             "ResultSetSize": 50,
             "SortDescending": True
         }
@@ -212,7 +213,7 @@ class CAROLQuery:
         try:
             with query_lock:
                 # avoids erroring concurrent api requests
-                time.sleep(2)
+                time.sleep(1.5)
             # print query parameters currently working on
             print("Querying CAROL...")
             print(f"Query for {self._values}")
@@ -246,7 +247,7 @@ class CAROLQuery:
             print(f'Result count: {self._result_list_count}')
             print(f'Max reached: {self._max_result_count_reached}\n')
 
-    def download(self):
+    def download(self, filenames):
         """Sends a download probe to the CAROL database.
         """
 
@@ -255,7 +256,7 @@ class CAROLQuery:
         try:
             with download_lock:
                 # avoids erroring concurrent api requests
-                time.sleep(2)
+                time.sleep(1.5)
             # print dots to signify working
             print(f"Downloading data from CAROL...")
             response = self._session.post(file_url, json=self._payload, timeout=60)
@@ -306,6 +307,7 @@ class CAROLQuery:
                 with zipfile.ZipFile(f'./output/{folder}.zip', 'r') as zip_ref:
                     # extract all the contents of the zip file to the current directory
                     zip_ref.extractall(f'./output/{self._values}')
+                    filenames.append(f'./output/{self._values}/{folder}.csv')
 
                 # remove the zip file
                 os.remove(f'./output/{folder}.zip')
@@ -499,7 +501,7 @@ def generate_time_periods_or(constraints):
         
         # extract condition date
         parts = constraint.split()
-        condition_date = datetime.strptime(parts[-1], '%m/%d/%Y')
+        condition_date = datetime.strptime(parts[-1], '%Y-%m-%d')
         
         # check condition date bounds
         if condition_date < start_date or datetime.today() < condition_date:
@@ -628,29 +630,15 @@ def divide_into_month_segments(time_periods):
 
     return month_segments
 
-def powerset(rules):
-    """
-    Generate the powerset of a list of rule objects without singletons.
-    """
-    n = len(rules)
-    powerset_list = []
-
-    for i in range(2 ** n):
-        subset = [rules[j] for j in range(n) if (i & (1 << j)) != 0]
-        if len(subset) > 1:  # Exclude singletons
-            powerset_list.append(subset)
-
-    return powerset_list
-
-def format_segments_as_constraints(segments, general_constraints, download, require_all):
+def format_segments_as_constraints(segments, general_constraints):
     
     constraints = []
     for segment in segments:
         
         # Create a tuple of query rules for the start and end dates
         start_date, end_date = segment
-        start_query_rule = query_rule("Event", "EventDate", "is on or after", start_date.strftime('%m/%d/%Y'))
-        end_query_rule = query_rule("Event", "EventDate", "is on or before", end_date.strftime('%m/%d/%Y'))
+        start_query_rule = query_rule("Event", "EventDate", "is on or after", start_date.strftime('%Y-%m-%d'))
+        end_query_rule = query_rule("Event", "EventDate", "is on or before", end_date.strftime('%Y-%m-%d'))
         date_tuple = (start_query_rule, end_query_rule)
         
         # Convert the tuple to a list
@@ -662,9 +650,32 @@ def format_segments_as_constraints(segments, general_constraints, download, requ
         # Convert the extended list back to a tuple
         constraints.append(tuple(extended_list))
     
-    kwargs = {'download': download, 'require_all': require_all}
+    return constraints
 
-    return constraints, kwargs
+def aggregate_csv_files(csv_files):
+    if not csv_files:
+        print("No CSV files to aggregate.")
+        return
+
+    # Create an empty DataFrame to store aggregated data
+    aggregated_df = pd.DataFrame()
+
+    # Iterate through CSV files and append data to the aggregated DataFrame
+    for csv_file in csv_files:
+        try:
+            df = pd.read_csv(csv_file)
+            aggregated_df = pd.concat([aggregated_df, df], ignore_index=True)
+        except Exception as e:
+            print(f"Error reading {csv_file}: {e}")
+
+    # Specify the output aggregated CSV file path
+    aggregated_csv_file = "./output/aggregated_data.csv"
+
+    # Save the aggregated data to the CSV file
+    aggregated_df.to_csv(aggregated_csv_file, index=False)
+
+    print(f"\nAggregated data saved to {aggregated_csv_file}")
+    print(f"Search Results: {aggregated_df.shape[0]}")
     
 def submit_query(*args, **kwargs):
     """A one-time query to the CAROL Database.
@@ -688,7 +699,7 @@ def submit_query(*args, **kwargs):
 
     # Download query
     if (kwargs['download'] and q._result_list_count > 0):
-        q.download()
+        q.download(kwargs['csv_files'])
     
     # Return query object
     return q
@@ -740,7 +751,7 @@ def query(*args, download = False, require_all = True):
     
     segments = divide_into_month_segments(time_periods)
 
-    query_segments, kwargs = format_segments_as_constraints(segments, general_constraints, download, require_all)
+    query_segments = format_segments_as_constraints(segments, general_constraints)
                 
     # Create a multiprocessing Pool with the desired number of processes
     num_processes = cpu_count()  # Use all available CPU cores
@@ -750,10 +761,14 @@ def query(*args, download = False, require_all = True):
     pool = Pool(initializer=init, initargs=(ql,dl,fl), processes=num_processes)
     
     start_time = time.time()
+
+    # Create a multiprocessing-safe list to store CSV file names generated by each process
+    manager = Manager()
+    csv_files = manager.list()
     
     # Use the map function to distribute the segments among processes
     with pool as p:
-        p.starmap(partial(submit_query, **kwargs), query_segments)
+        p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files), query_segments)
 
     # Close the pool to free up resources
     pool.close()
@@ -762,6 +777,10 @@ def query(*args, download = False, require_all = True):
     # for segment in query_segments:
     #     print(segment[0])
     #     process_segment(segment)
+
+    csv_files = list(csv_files)
+    csv_files.sort(reverse=True)
+    aggregate_csv_files(csv_files)
     
     end_time = time.time()
     execution_time = end_time - start_time
@@ -777,8 +796,8 @@ if __name__ == '__main__':
     # query(("engine power", "Narrative", "Factual", "contains"))
     # query('is on or before today')
     # query('is today')
-    # query("fire", "is on or after 1/1/2013", "is before 1/1/2014", download=True, require_all=False)
-    query("fire", "engine power", download=True, require_all=False)
+    query("is on or after 1/1/2023", "is before 1/1/1949", download=True, require_all=False)
+    # query("fire", "engine power", download=True, require_all=False)
     
     # query(("Analysis Narrative", "does not contain", "alcohol"))
     # query(("fire", "after 1/1/13", "before 1/1/14"))
