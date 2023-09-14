@@ -96,7 +96,7 @@ class CAROLQuery:
             "SortColumn": None,
             "SortDescending": True,
             "TargetCollection": "cases",
-            "SessionId": 1001000
+            "SessionId": 100000
         }
 
         #Creates an unfinished payload (download probe) with rules to be added
