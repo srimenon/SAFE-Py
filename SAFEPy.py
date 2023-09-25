@@ -10,14 +10,13 @@ import time
 from multiprocessing import Manager, Pool, Lock, cpu_count
 from functools import partial
 import copy
-import spacy
 import pandas as pd
 
 # Define the URL
 probe_url = "https://data.ntsb.gov/carol-main-public/api/Query/Main"
 file_url = "https://data.ntsb.gov/carol-main-public/api/Query/FileExport"
 
-#Load JSON into a more python-friendly dictionary
+# Load JSON into a more python-friendly dictionary
 f = open('possible_values.json')
 raw_json = json.load(f)
 
@@ -209,11 +208,12 @@ class CAROLQuery:
         """
 
         # Send the probe POST request
+        # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'}
         response = None
         try:
             with query_lock:
                 # avoids erroring concurrent api requests
-                time.sleep(1.5)
+                time.sleep(1)
             # print query parameters currently working on
             print("Querying CAROL...")
             print(f"Query for {self._values}")
