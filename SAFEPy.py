@@ -208,7 +208,7 @@ class CAROLQuery:
         """
 
         # Send the probe POST request
-        # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'}
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'}
         response = None
         try:
             with query_lock:
@@ -217,7 +217,7 @@ class CAROLQuery:
             # print query parameters currently working on
             print("Querying CAROL...")
             print(f"Query for {self._values}")
-            response = self._session.post(probe_url, json=self._probe, timeout=60)
+            response = self._session.post(probe_url, json=self._probe, timeout=60, headers=headers)
                 
         except requests.exceptions.Timeout:
             print("The request timed out")
@@ -253,13 +253,14 @@ class CAROLQuery:
 
         # Send the file POST request
         response = None
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'}
         try:
-            with download_lock:
+            with query_lock:
                 # avoids erroring concurrent api requests
                 time.sleep(1.5)
             # print dots to signify working
             print(f"Downloading data from CAROL...")
-            response = self._session.post(file_url, json=self._payload, timeout=60)
+            response = self._session.post(file_url, json=self._payload, timeout=60, headers=headers)
         except requests.exceptions.Timeout:
             print("The request timed out")
         except requests.exceptions.RequestException as e:
@@ -325,22 +326,35 @@ def to_standard_date_format(cond_str, date_str):
             f"Valid conditions are: is on or before, is on or after, is before, is after, is, is not\n" +
             "Date condition is not in a valid format. Please enter dates in the following format: '<condition> mm/dd/yyyy'.")
 
-def has_subject_and_verb(text):
-    nlp = spacy.load("en_core_web_sm")
-    doc = nlp(text)
+def long_search(input_string):
+    """
+    This function checks if the input string ends with a punctuation
+    or if the string is longer than 10 words.
+
+    :param input_string: str, the input string to be checked
+    :return: bool, True if the string ends with punctuation or is longer than 10 words, False otherwise
+    """
+    # Define a set of punctuation characters
+    punctuation_characters = {'.', '!', '?', ',', ';', ':', '-', '(', ')', '[', ']', '{', '}', '...', '\'', '\"'}
     
-    # Check if the document contains at least one verb and one subject
-    has_verb = any(token.pos_ in ["VERB", "AUX"] for token in doc)
-    has_subject = any(token.dep_ == "nsubj" for token in doc)
+    # Check if the string ends with a punctuation character
+    ends_with_punctuation = input_string[-1] in punctuation_characters if input_string else False
     
-    return has_verb and has_subject
+    # Count the number of words in the string
+    word_count = len(input_string.split())
+    
+    # Check if the string has more than 10 words
+    is_longer_than_ten_words = word_count > 10
+    
+    # Return True if either condition is met
+    return ends_with_punctuation or is_longer_than_ten_words
 
 def query_decide(value: str):
     """Using pattern matching, decides which field, subfield, and condition an arbitrary value falls under.
     """
 
     # Checks for full sentence
-    if has_subject_and_verb(value):
+    if long_search(value):
         while True:
             user_input = input(f"Your input was: {value}\nFull sentences input to SAFEPy will search for the string in the Factual Narrative. Continue? (yes/no): ")
             normalized_input = user_input.lower().strip()
@@ -353,7 +367,7 @@ def query_decide(value: str):
             else:
                 print("Invalid input. Please enter 'yes' or 'no'.")
     
-    # Date decision with greedy check (for things like 'today')
+    # Date decision with greedy check
     normalized_value = value.lower().strip()
     try:
         parsed_date = parser.parse(normalized_value)
@@ -630,19 +644,42 @@ def divide_into_month_segments(time_periods):
 
     return month_segments
 
+def generate_segments(keys_per_segment):
+    # Define the start and end values
+    start_value = 0
+    end_value = 200000
+
+    # Initialize the segments list
+    segments = []
+
+    # Calculate the number of segments needed
+    num_segments = (end_value - start_value) // keys_per_segment
+
+    # Generate segments
+    for i in range(num_segments):
+        lower_bound = (i * keys_per_segment) - 1
+        upper_bound = (i + 1) * keys_per_segment
+        segments.append((lower_bound, upper_bound))
+
+    # Handle the last segment which might have less than keys_per_segment keys
+    if end_value % keys_per_segment != 0:
+        segments.append((upper_bound + 1, end_value))
+
+    return segments
+
 def format_segments_as_constraints(segments, general_constraints):
     
     constraints = []
     for segment in segments:
         
         # Create a tuple of query rules for the start and end dates
-        start_date, end_date = segment
-        start_query_rule = query_rule("Event", "EventDate", "is on or after", start_date.strftime('%Y-%m-%d'))
-        end_query_rule = query_rule("Event", "EventDate", "is on or before", end_date.strftime('%Y-%m-%d'))
-        date_tuple = (start_query_rule, end_query_rule)
+        start_key, end_key = segment
+        start_query_rule = query_rule("Event", "ID", "is greater than", str(start_key))
+        end_query_rule = query_rule("Event", "ID", "is less than", str(end_key))
+        key_tuple = (start_query_rule, end_query_rule)
         
         # Convert the tuple to a list
-        extended_list = list(date_tuple)
+        extended_list = list(key_tuple)
 
         # Extend the list with elements from general constraints
         extended_list.extend(general_constraints) 
@@ -737,10 +774,10 @@ def query(*args, download = False, require_all = True):
         if len(e_list):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
         
-        if subfield == "EventDate":
-            date_constraints.append(f'{condition} {value}')
-        else:
-            general_constraints.append(rule)
+        # if subfield == "EventDate":
+        #     date_constraints.append(f'{condition} {value}')
+        # else:
+        general_constraints.append(rule)
     
     # generate time periods correlating with date constraints
     time_periods = []
@@ -749,7 +786,8 @@ def query(*args, download = False, require_all = True):
     else:
         time_periods = generate_time_periods_or(date_constraints)
     
-    segments = divide_into_month_segments(time_periods)
+    # segments = divide_into_month_segments(time_periods)
+    segments = generate_segments(250)
 
     query_segments = format_segments_as_constraints(segments, general_constraints)
                 
@@ -793,11 +831,6 @@ if __name__ == '__main__':
         # query('How many airplanes crash because of airplane failure?')
         # query()
         
-    # query(("engine power", "Narrative", "Factual", "contains"))
-    # query('is on or before today')
-    # query('is today')
-    query("is on or after 1/1/2023", "is before 1/1/1949", download=True, require_all=False)
+    query('is on or after 9-1-75', download=True)
+    # query("is on or after 1/1/2023", "is before 1/1/1949", download=True, require_all=False)
     # query("fire", "engine power", download=True, require_all=False)
-    
-    # query(("Analysis Narrative", "does not contain", "alcohol"))
-    # query(("fire", "after 1/1/13", "before 1/1/14"))
