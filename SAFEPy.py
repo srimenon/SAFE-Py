@@ -136,21 +136,31 @@ class CAROLQuery:
     def __del__(self):
         self._session.close()
 
-    def addQueryGroup(self, rule, condition, subfield):
-        # if we already have a rule in the current query group
-        if len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) > 2 and subfield != "ID":
-            self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
-            self._payload["QueryGroups"].append(copy.deepcopy(self._query_group))
-            # update group count
+    def addQueryGroup(self, rule, condition, subfield, andOr):
+        if andOr:
+            # if we already have a rule in the current query group
+            if len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) > 2 and subfield != "ID":
+                self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
+                self._payload["QueryGroups"].append(copy.deepcopy(self._query_group))
+                # update group count
+                self._curr_group_index = len(self._probe["QueryGroups"]) - 1
+                # add the constraint to gen list
+                self._general_constraints.append(rule)             
+            elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 0 and subfield == "ID" and condition == "is greater than":
+                self._query_group["QueryRules"].append(rule)
+            elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 1 and subfield == "ID" and condition == "is less than":
+                self._query_group["QueryRules"].append(rule)
+            elif subfield != "ID":
+                self._general_constraints.append(rule)
+        else:
+            # Create a new query group for every rule
+            new_query_group = copy.deepcopy(self._query_group)
+            new_query_group["QueryRules"].append(rule)
+            self._probe["QueryGroups"].append(new_query_group)
+            self._payload["QueryGroups"].append(new_query_group)
             self._curr_group_index = len(self._probe["QueryGroups"]) - 1
-            # add the constraint to gen list
-            self._general_constraints.append(rule)             
-        elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 0 and subfield == "ID" and condition == "is greater than":
-            self._query_group["QueryRules"].append(rule)
-        elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 1 and subfield == "ID" and condition == "is less than":
-            self._query_group["QueryRules"].append(rule)
-        elif subfield != "ID":
-            self._general_constraints.append(rule)
+            if subfield != "ID":
+                self._general_constraints.append(rule)
 
     def addQueryRule(self, field, subfield, condition, values, andOr):
         """Adds a query rule to the CAROLQuery class.
@@ -165,7 +175,7 @@ class CAROLQuery:
             condition = "contains"
             input_t = self._data[field][subfield]["input"]
             
-        self._values.append(values)
+        self._values.append(f'{condition} {values}')
 
         rule =  {
             "RuleType": "Simple",
@@ -191,7 +201,7 @@ class CAROLQuery:
         
         # if "or" logic and not the first rule
         if not andOr:
-            self.addQueryGroup(rule, condition, subfield)
+            self.addQueryGroup(rule, condition, subfield, andOr)
                     
         # append the rule to the probe and the download payload
         self._probe["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
@@ -205,7 +215,7 @@ class CAROLQuery:
         self._payload["QueryGroups"][0]["QueryRules"] = []
         print("Query parameters cleared!")
               
-    def query(self):
+    def query(self, download=False):
         """Sends a query probe to the CAROL Database.
         """
 
@@ -213,9 +223,10 @@ class CAROLQuery:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'}
         response = None
         try:
-            with query_lock:
-                # avoids erroring concurrent api requests
-                time.sleep(2)
+            if download:
+                with query_lock:
+                    # avoids erroring concurrent api requests
+                    time.sleep(2)
             # print query parameters currently working on
             print("Querying CAROL...")
             print(f"Query for {self._values}")
@@ -317,7 +328,7 @@ class CAROLQuery:
                 
                 with complete_lock:
                     number_complete.value += 1
-                print(f"Completed {number_complete.value} of {total_queries.value}")
+                print(f"Completed {number_complete.value} of (at most) {total_queries.value}")
             
 def to_standard_date_format(cond_str, date_str):
     try:
@@ -380,7 +391,7 @@ def query_decide(value: str):
         print(f"Using default condition: is on or after\n" + 
             f"Detected date: {parsed_date}\n" +
             f"Adding date condition to query.")
-        return "Event", "EventDate", "is on or after", parsed_date
+        return "Event", "EventDate", "is on or after", parsed_date.strftime('%Y-%m-%d')
     except:
         pass
 
@@ -447,6 +458,12 @@ def query_rule_sort(arg):
         for a in arg:
             key, a_match = query_key_sort(a)
             rule[key] = a_match
+        if rule[1] == 'EventDate':
+            _, _, _, rule[3] = query_decide(rule[3])
+            
+    # if 5 or more args found
+    else:
+        raise MalformedQueryError("Too many arguments. Query rules must have 4 or fewer arguments.")
 
     return rule
 
@@ -659,7 +676,7 @@ def generate_key_segments_and(keys_per_segment, key_constraints):
                 # if the key pair is within the constraint, then update the lower bound
                 if key_pair[0] < int(constraint.split(' ')[-1]) + 1 < key_pair[1]:
                     key_pair[0] = int(constraint.split(' ')[-1]) + 1
-                elif key_pair[1] < int(constraint.split(' ')[-1]) + 1:
+                elif key_pair[1] < int(constraint.split(' ')[-1]):
                     matching_keys.remove(key_pair)
         elif 'less than' in constraint:
             for key_pair in matching_keys:
@@ -741,7 +758,7 @@ def format_segments_as_constraints(segments, general_constraints):
         if start_key == end_key:
             end_key += 1
         start_query_rule = query_rule("Event", "ID", "is greater than", str(start_key - 1))
-        end_query_rule = query_rule("Event", "ID", "is less than", str(end_key))
+        end_query_rule = query_rule("Event", "ID", "is less than", str(end_key + 1))
         key_tuple = (start_query_rule, end_query_rule)
         
         # Convert the tuple to a list
@@ -798,14 +815,18 @@ def submit_query(*args, **kwargs):
     q._values.append(f"require_all = {kwargs['require_all']}")
     
     # Run the query
-    q.query()
+    if not kwargs['only_download']:
+        q.query(download = kwargs['download'])
+    else:
+        q._result_list_count = 1
 
     # Download query
-    if (kwargs['download'] and q._result_list_count > 0):
-        q.download(kwargs['csv_files'], kwargs['number_complete'], kwargs['total_queries'])
-    elif (q._result_list_count == 0):
-        with complete_lock:
-            kwargs['total_queries'].value -= 1
+    if (kwargs['download']):
+        if q._result_list_count > 0:
+            q.download(kwargs['csv_files'], kwargs['number_complete'], kwargs['total_queries'])
+        elif (q._result_list_count == 0):
+            with complete_lock:
+                kwargs['total_queries'].value -= 1
     
     # Return query object
     return q
@@ -814,6 +835,8 @@ def query(*args, download = False, require_all = True):
     """A one-time query to the CAROL Database.
     The queries are input as a list of tuples or strings.
     """
+        
+    start_time = time.time()
     
     key_constraints = []
     general_constraints = []
@@ -843,53 +866,70 @@ def query(*args, download = False, require_all = True):
         if len(e_list):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
         
-        if subfield == "ID":
+        if subfield == "ID" and download == True:
             key_constraints.append(f'{condition} {value}')
         else:
             general_constraints.append(rule)
-    
-    # generate key segments correlating with key constraints
-    key_segments = []
-    key_segment_length = 400
-    if require_all:
-        key_segments = generate_key_segments_and(key_segment_length, key_constraints)
+         
+    gen_rule = tuple(general_constraints)
+    if download == False:
+        submit_query(*gen_rule, download = download, require_all = require_all)
     else:
-        key_segments = generate_key_segments_or(key_segment_length, key_constraints)
-
-    # generate query segments
-    query_segments = format_segments_as_constraints(key_segments, general_constraints)
-                
-    # Create a multiprocessing Pool with the desired number of processes
-    num_processes = cpu_count()  # Use all available CPU cores
-    ql = Lock() # query lock
-    dl = Lock() # download lock
-    fl = Lock() # file lock
-    cl = Lock() # complete lock
-    pool = Pool(initializer=init, initargs=(ql, dl, fl, cl), processes=num_processes)
+        
+        one_request = False
+        print("Checking number of datapoints for request...")
+        result_count = submit_query(*gen_rule, download = False, require_all = require_all, only_download = one_request)._result_list_count
+        if 0 < result_count < 3500:
+            print("Good news! We can download the data in one request.")
+            one_request = True
+        elif result_count == 0:
+            print("No results found.")
+            return
     
-    start_time = time.time()
+        # generate key segments correlating with key constraints
+        key_segments = []
+        key_segment_length = 400
+        if require_all:
+            key_segments = generate_key_segments_and(key_segment_length, key_constraints)
+        else:
+            key_segments = generate_key_segments_or(key_segment_length, key_constraints)
 
-    # Create a multiprocessing-safe list to store CSV file names generated by each process
-    manager = Manager()
-    csv_files = manager.list()
-    number_complete = manager.Value('i', 0)
-    total_queries = manager.Value('i', len(query_segments))
-    
-    # Use the map function to distribute the segments among processes
-    with pool as p:
-        p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files, number_complete = number_complete, total_queries = total_queries), query_segments)
+        # generate query segments
+        query_segments = format_segments_as_constraints(key_segments, general_constraints)
+                    
+        # Create a multiprocessing Pool with the desired number of processes
+        num_processes = cpu_count()  # Use all available CPU cores
+        ql = Lock() # query lock
+        dl = Lock() # download lock
+        fl = Lock() # file lock
+        cl = Lock() # complete lock
+        pool = Pool(initializer=init, initargs=(ql, dl, fl, cl), processes=num_processes)
+        
 
-    # Close the pool to free up resources
-    pool.close()
-    pool.join()  # Wait for all processes to finish
-    
-    # for segment in query_segments:
-    #     print(segment[0])
-    #     process_segment(segment)
+        # Create a multiprocessing-safe list to store CSV file names generated by each process
+        manager = Manager()
+        csv_files = manager.list()
+        number_complete = manager.Value('i', 0)
+        total_queries = manager.Value('i', len(query_segments))
+        
+        # Use the map function to distribute the segments among processes
+        with pool as p:
+            if one_request:
+                p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files, number_complete = number_complete, total_queries = 1, only_download = one_request), [gen_rule])
+            else:
+                p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files, number_complete = number_complete, total_queries = total_queries, only_download = one_request), query_segments)
 
-    csv_files = list(csv_files)
-    csv_files.sort(reverse=True)
-    aggregate_csv_files(csv_files)
+        # Close the pool to free up resources
+        pool.close()
+        pool.join()  # Wait for all processes to finish
+        
+        # for segment in query_segments:
+        #     print(segment[0])
+        #     process_segment(segment)
+
+        csv_files = list(csv_files)
+        csv_files.sort(reverse=True)
+        aggregate_csv_files(csv_files)
     
     end_time = time.time()
     execution_time = end_time - start_time
@@ -901,7 +941,8 @@ if __name__ == '__main__':
         # query("engine power", datetime.today() - timedelta(days=1), datetime.today())
         # query('How many airplanes crash because of airplane failure?')
         # query()
-        
-    query('is on or after 9-1-75', download=True)
+
+    # query(('Event', 'ID', 'is greater than', '190000'), ('Event', 'EventDate', 'is on or after', '10-23-2020'), ('Aircraft', 'AircraftCategory', 'is', 'BLIM'), download=False, require_all=True)
+    query(('Event', 'EventDate', 'is on or after', '10-23-2022'), ('Event', 'EventDate', 'is on or before', '10-23-1950'), download=True, require_all=True)
     # query("is on or after 1/1/2023", "is before 1/1/1949", download=True, require_all=False)
     # query("fire", "engine power", download=True, require_all=False)
