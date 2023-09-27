@@ -42,13 +42,15 @@ for field in raw_json["fields"]:
             tmp1_dict[None]["values"].append(queryValue["value"])
 
 # multiprocessing lock init
-def init(ql,dl,fl):
+def init(ql, dl, fl, cl):
     global query_lock
     global download_lock
     global file_lock
+    global complete_lock
     query_lock = ql
     download_lock = dl
     file_lock = fl
+    complete_lock = cl
 
 class MalformedQueryError(Exception):
     pass
@@ -136,18 +138,18 @@ class CAROLQuery:
 
     def addQueryGroup(self, rule, condition, subfield):
         # if we already have a rule in the current query group
-        if len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) > 2 and subfield != "EventDate":
+        if len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) > 2 and subfield != "ID":
             self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
             self._payload["QueryGroups"].append(copy.deepcopy(self._query_group))
             # update group count
             self._curr_group_index = len(self._probe["QueryGroups"]) - 1
             # add the constraint to gen list
             self._general_constraints.append(rule)             
-        elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 0 and subfield == "EventDate" and condition == "is on or after":
+        elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 0 and subfield == "ID" and condition == "is greater than":
             self._query_group["QueryRules"].append(rule)
-        elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 1 and subfield == "EventDate" and condition == "is on or before":
+        elif len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 1 and subfield == "ID" and condition == "is less than":
             self._query_group["QueryRules"].append(rule)
-        elif subfield != "EventDate":
+        elif subfield != "ID":
             self._general_constraints.append(rule)
 
     def addQueryRule(self, field, subfield, condition, values, andOr):
@@ -213,7 +215,7 @@ class CAROLQuery:
         try:
             with query_lock:
                 # avoids erroring concurrent api requests
-                time.sleep(1)
+                time.sleep(2)
             # print query parameters currently working on
             print("Querying CAROL...")
             print(f"Query for {self._values}")
@@ -247,7 +249,7 @@ class CAROLQuery:
             print(f'Result count: {self._result_list_count}')
             print(f'Max reached: {self._max_result_count_reached}\n')
 
-    def download(self, filenames):
+    def download(self, filenames, number_complete, total_queries):
         """Sends a download probe to the CAROL database.
         """
 
@@ -257,7 +259,7 @@ class CAROLQuery:
         try:
             with query_lock:
                 # avoids erroring concurrent api requests
-                time.sleep(1.5)
+                time.sleep(5)
             # print dots to signify working
             print(f"Downloading data from CAROL...")
             response = self._session.post(file_url, json=self._payload, timeout=60, headers=headers)
@@ -312,6 +314,10 @@ class CAROLQuery:
 
                 # remove the zip file
                 os.remove(f'./output/{folder}.zip')
+                
+                with complete_lock:
+                    number_complete.value += 1
+                print(f"Completed {number_complete.value} of {total_queries.value}")
             
 def to_standard_date_format(cond_str, date_str):
     try:
@@ -444,229 +450,287 @@ def query_rule_sort(arg):
 
     return rule
 
-def generate_time_periods_and(constraints):
-    # initialize time period to maximum interval
-    start_date = datetime(1948, 10, 24)
-    time_periods = [[start_date, datetime.today()]]
+# def generate_time_periods_and(constraints):
+#     # initialize time period to maximum interval
+#     start_date = datetime(1948, 10, 24)
+#     time_periods = [[start_date, datetime.today()]]
 
-    # process all constraints
-    for constraint in constraints:
+#     # process all constraints
+#     for constraint in constraints:
         
-        # extract condition date
-        parts = constraint.split()
-        condition_date = datetime.strptime(parts[-1], '%Y-%m-%d')
+#         # extract condition date
+#         parts = constraint.split()
+#         condition_date = datetime.strptime(parts[-1], '%Y-%m-%d')
         
-        # check condition date bounds
-        if condition_date < start_date or datetime.today() < condition_date:
-            raise ValueError(f"Date {parts[-1]} should be between 10/24/1948 and today.")
+#         # check condition date bounds
+#         if condition_date < start_date or datetime.today() < condition_date:
+#             raise ValueError(f"Date {parts[-1]} should be between 10/24/1948 and today.")
 
-        # compare condition date to all current periods
-        for period in time_periods:
-            if 'before' in constraint:
-                if 'on' in constraint: # is on or before
-                    if period[0] <= condition_date < period[1]: # if condition within period
-                        period[1] = condition_date
-                    elif condition_date < period[0]: # if condition before period
-                        time_periods.remove(period)
-                else: # is before
-                    if period[0] < condition_date <= period[1]: # if condition within period
-                        period[1] = condition_date - timedelta(days=1)
-                    elif condition_date <= period[0]: # if condition before period
-                        time_periods.remove(period)
-            elif 'after' in constraint:
-                if 'on' in constraint: # is on or after
-                    if period[0] < condition_date <= period[1]: # if condition within period
-                        period[0] = condition_date
-                    elif period[1] < condition_date: # if condition after period
-                        time_periods.remove(period)
-                else: # is after
-                    if period[0] <= condition_date < period[1]: # if condition within period
-                        period[0] = condition_date + timedelta(days=1)
-                    elif period[1] <= condition_date: # if condition after period
-                        time_periods.remove(period)
-            elif 'not' in constraint and period[0] <= condition_date <= period[1]: # is not
-                time_periods.append([period[0], condition_date - timedelta(days=1)])
-                time_periods.append([condition_date + timedelta(days=1), period[1]])
-                time_periods.remove(period)
-                break
-            elif 'is' in constraint and period[0] <= condition_date <= period[1]: # is
-                period[0] = period[1] = condition_date
-                break
-            else: # is but not within current period
-                time_periods.remove(period)
+#         # compare condition date to all current periods
+#         for period in time_periods:
+#             if 'before' in constraint:
+#                 if 'on' in constraint: # is on or before
+#                     if period[0] <= condition_date < period[1]: # if condition within period
+#                         period[1] = condition_date
+#                     elif condition_date < period[0]: # if condition before period
+#                         time_periods.remove(period)
+#                 else: # is before
+#                     if period[0] < condition_date <= period[1]: # if condition within period
+#                         period[1] = condition_date - timedelta(days=1)
+#                     elif condition_date <= period[0]: # if condition before period
+#                         time_periods.remove(period)
+#             elif 'after' in constraint:
+#                 if 'on' in constraint: # is on or after
+#                     if period[0] < condition_date <= period[1]: # if condition within period
+#                         period[0] = condition_date
+#                     elif period[1] < condition_date: # if condition after period
+#                         time_periods.remove(period)
+#                 else: # is after
+#                     if period[0] <= condition_date < period[1]: # if condition within period
+#                         period[0] = condition_date + timedelta(days=1)
+#                     elif period[1] <= condition_date: # if condition after period
+#                         time_periods.remove(period)
+#             elif 'not' in constraint and period[0] <= condition_date <= period[1]: # is not
+#                 time_periods.append([period[0], condition_date - timedelta(days=1)])
+#                 time_periods.append([condition_date + timedelta(days=1), period[1]])
+#                 time_periods.remove(period)
+#                 break
+#             elif 'is' in constraint and period[0] <= condition_date <= period[1]: # is
+#                 period[0] = period[1] = condition_date
+#                 break
+#             else: # is but not within current period
+#                 time_periods.remove(period)
 
-    return time_periods
+#     return time_periods
 
-def generate_time_periods_or(constraints):
-    # initialize time period to maximum interval
-    start_date = datetime(1948, 10, 24)
-    time_periods = []
+# def generate_time_periods_or(constraints):
+#     # initialize time period to maximum interval
+#     start_date = datetime(1948, 10, 24)
+#     time_periods = []
     
-    # init with dates just outside acceptable range
-    first_date_before_range = datetime(1948, 10, 23)
-    latest_before = first_date_before_range
-    tomorrow = datetime.today() + timedelta(days=1)
-    earliest_after = tomorrow
+#     # init with dates just outside acceptable range
+#     first_date_before_range = datetime(1948, 10, 23)
+#     latest_before = first_date_before_range
+#     tomorrow = datetime.today() + timedelta(days=1)
+#     earliest_after = tomorrow
+#     is_conditions = []
+#     not_cond = None
+
+#     # process all constraints
+#     for constraint in constraints:
+        
+#         # extract condition date
+#         parts = constraint.split()
+#         condition_date = datetime.strptime(parts[-1], '%Y-%m-%d')
+        
+#         # check condition date bounds
+#         if condition_date < start_date or datetime.today() < condition_date:
+#             raise ValueError(f"Date {parts[-1]} should be between 10/24/1948 and today.")
+        
+#         if 'before' in constraint:
+#             if 'on' in constraint and (latest_before == first_date_before_range or latest_before < condition_date):
+#                 latest_before = condition_date
+#             elif latest_before == first_date_before_range or latest_before < condition_date - timedelta(days=1): # is before
+#                 latest_before = condition_date - timedelta(days=1)
+#         elif 'after' in constraint:
+#             if 'on' in constraint and (earliest_after == tomorrow or condition_date < earliest_after): # is on or after
+#                 earliest_after = condition_date
+#             elif earliest_after == tomorrow or condition_date + timedelta(days = 1) < earliest_after: # is after
+#                 earliest_after = condition_date + timedelta(days = 1)
+#         elif 'not' in constraint: # is not
+#             if not_cond and not_cond is not condition_date: # non-matching not conditions
+#                 return [[start_date, datetime.today()]]
+#             elif condition_date in is_conditions: # matching not condition and is condition
+#                 return [[start_date, datetime.today()]]
+#             elif latest_before > condition_date or earliest_after < condition_date: # not outside the bounds of existing cond
+#                 return [[start_date, datetime.today()]]
+#             else: # our time period is everything except not condition
+#                 time_periods = [[start_date, condition_date - timedelta(days=1)], [condition_date + timedelta(days=1), datetime.today()]]
+#                 not_cond = condition_date
+#         elif 'is' in constraint:
+#             if condition_date == not_cond:
+#                 return [[start_date, datetime.today()]]
+#             is_conditions.append(condition_date)
+#         else: # is but not within current period
+#             raise ValueError(f"Constraint is not formatted properly. It must include: 'is', 'is not', 'is on or before', 'is before', 'is on or after', or 'is after'.")
+        
+#     # check for only general constraints   
+#     if len(constraints) == 0:
+#         return [[start_date, datetime.today()]]
+    
+#     # check not condition
+#     if not_cond:
+#         if latest_before > not_cond or earliest_after < not_cond:
+#             return [[start_date, datetime.today()]]
+#         else:
+#             return sorted(time_periods)
+            
+#     # check latest_before and earliest_after
+#     if latest_before >= earliest_after: # if we have before and after conditions covering whole range
+#         time_periods = [[start_date, datetime.today()]]
+#     else: # check the is conditions to add dates
+#         time_periods = [[start_date, latest_before], [earliest_after, datetime.today()]]
+#         # include is conditions
+#         for is_cond in is_conditions:
+#             if latest_before < is_cond < earliest_after:
+#                 time_periods.append([is_cond, is_cond])
+
+#     return sorted(time_periods)
+
+# def divide_into_year_segments(time_periods):
+#     year_segments = []
+
+#     for period in time_periods:
+#         start_date, end_date = period
+
+#         period_year = start_date.year
+#         while period_year <= end_date.year:
+#             next_year_start = datetime(period_year + 1, 1, 1)
+#             if next_year_start > end_date:
+#                 year_segments.append((start_date, end_date))
+#             else:
+#                 year_segments.append((start_date, next_year_start - timedelta(days=1)))
+#             period_year += 1
+#             start_date = next_year_start
+
+#     return year_segments
+
+# def divide_into_half_year_segments(time_periods):
+#     half_year_segments = []
+
+#     for period in time_periods:
+#         start_date, end_date = period
+
+#         while start_date <= end_date:
+#             next_half_year_start = start_date + timedelta(days=183)
+            
+#             if next_half_year_start > end_date:
+#                 half_year_segments.append((start_date, end_date))
+#             else:
+#                 half_year_segments.append((start_date, next_half_year_start - timedelta(days=1)))
+                
+#             start_date = next_half_year_start
+
+#     return half_year_segments
+
+# def divide_into_quarter_year_segments(time_periods):
+#     quarter_year_segments = []
+
+#     for period in time_periods:
+#         start_date, end_date = period
+
+#         while start_date <= end_date:
+#             next_quarter_start = start_date + timedelta(days=91)
+            
+#             if next_quarter_start > end_date:
+#                 quarter_year_segments.append((start_date, end_date))
+#             else:
+#                 quarter_year_segments.append((start_date, next_quarter_start - timedelta(days=1)))
+                
+#             start_date = next_quarter_start
+
+#     return quarter_year_segments
+
+# def divide_into_month_segments(time_periods):
+#     month_segments = []
+
+#     for period in time_periods:
+#         start_date, end_date = period
+
+#         while start_date <= end_date:
+#             _, last_day = calendar.monthrange(start_date.year, start_date.month)
+#             next_month_start = datetime(start_date.year, start_date.month, last_day) + timedelta(days=1)
+            
+#             if next_month_start > end_date:
+#                 month_segments.append((start_date, end_date))
+#             else:
+#                 month_segments.append((start_date, next_month_start - timedelta(days=1)))
+                
+#             start_date = next_month_start
+
+#     return month_segments
+
+def generate_key_segments_and(keys_per_segment, key_constraints):
+    
+    matching_keys = [[0, 200000]]
+    for constraint in key_constraints:
+        if 'greater than' in constraint:
+            for key_pair in matching_keys:
+                # if the key pair is within the constraint, then update the lower bound
+                if key_pair[0] < int(constraint.split(' ')[-1]) + 1 < key_pair[1]:
+                    key_pair[0] = int(constraint.split(' ')[-1]) + 1
+                elif key_pair[1] < int(constraint.split(' ')[-1]) + 1:
+                    matching_keys.remove(key_pair)
+        elif 'less than' in constraint:
+            for key_pair in matching_keys:
+                # if the key pair is within the constraint, then update the lower bound
+                if key_pair[0] < int(constraint.split(' ')[-1]) + 1 < key_pair[1]:
+                    key_pair[1] = int(constraint.split(' ')[-1]) - 1
+                elif key_pair[0] > int(constraint.split(' ')[-1]) + 1:
+                    matching_keys.remove(key_pair)        
+        elif 'not' in constraint:
+            for key_pair in matching_keys:
+                if key_pair[0] == int(constraint.split(' ')[-1]):
+                    key_pair[0] += 1
+                elif key_pair[1] == int(constraint.split(' ')[-1]):
+                    key_pair[1] -= 1
+                if key_pair[0] < int(constraint.split(' ')[-1]) < key_pair[1]:
+                    matching_keys.append([key_pair[0], int(constraint.split(' ')[-1]) - 1])
+                    matching_keys.append([int(constraint.split(' ')[-1]) + 1, key_pair[1]])
+                    matching_keys.remove(key_pair)
+        else:
+            matching_keys = [((int(constraint.split(' ')[-1])), (int(constraint.split(' ')[-1])))]
+            
+    # Break the matching_keys into smaller segments of size keys_per_segment
+    final_segments = []
+    for key_pair in matching_keys:
+        lower, upper = key_pair
+        for i in range(lower, upper + 1, keys_per_segment):
+            final_segments.append([i, min(i + keys_per_segment - 1, upper)])
+    
+    return final_segments
+
+def generate_key_segments_or(keys_per_segment, key_constraints):
+    
+    global_greater = 200001
+    global_lesser = -1
     is_conditions = []
     not_cond = None
-
-    # process all constraints
-    for constraint in constraints:
-        
-        # extract condition date
-        parts = constraint.split()
-        condition_date = datetime.strptime(parts[-1], '%Y-%m-%d')
-        
-        # check condition date bounds
-        if condition_date < start_date or datetime.today() < condition_date:
-            raise ValueError(f"Date {parts[-1]} should be between 10/24/1948 and today.")
-        
-        if 'before' in constraint:
-            if 'on' in constraint and (latest_before == first_date_before_range or latest_before < condition_date):
-                latest_before = condition_date
-            elif latest_before == first_date_before_range or latest_before < condition_date - timedelta(days=1): # is before
-                latest_before = condition_date - timedelta(days=1)
-        elif 'after' in constraint:
-            if 'on' in constraint and (earliest_after == tomorrow or condition_date < earliest_after): # is on or after
-                earliest_after = condition_date
-            elif earliest_after == tomorrow or condition_date + timedelta(days = 1) < earliest_after: # is after
-                earliest_after = condition_date + timedelta(days = 1)
-        elif 'not' in constraint: # is not
-            if not_cond and not_cond is not condition_date: # non-matching not conditions
-                return [[start_date, datetime.today()]]
-            elif condition_date in is_conditions: # matching not condition and is condition
-                return [[start_date, datetime.today()]]
-            elif latest_before > condition_date or earliest_after < condition_date: # not outside the bounds of existing cond
-                return [[start_date, datetime.today()]]
-            else: # our time period is everything except not condition
-                time_periods = [[start_date, condition_date - timedelta(days=1)], [condition_date + timedelta(days=1), datetime.today()]]
-                not_cond = condition_date
-        elif 'is' in constraint:
-            if condition_date == not_cond:
-                return [[start_date, datetime.today()]]
-            is_conditions.append(condition_date)
-        else: # is but not within current period
-            raise ValueError(f"Constraint is not formatted properly. It must include: 'is', 'is not', 'is on or before', 'is before', 'is on or after', or 'is after'.")
-        
-    # check for only general constraints   
-    if len(constraints) == 0:
-        return [[start_date, datetime.today()]]
-    
-    # check not condition
-    if not_cond:
-        if latest_before > not_cond or earliest_after < not_cond:
-            return [[start_date, datetime.today()]]
+    for constraint in key_constraints:
+        if 'greater than' in constraint:
+            global_greater = min(global_greater, int(constraint.split(' ')[-1]) + 1)
+        elif 'less than' in constraint:
+            global_lesser = max(global_lesser, int(constraint.split(' ')[-1]) - 1)
+        elif 'not' in constraint:
+            if not not_cond:
+                not_cond = int(constraint.split(' ')[-1])
+            elif not_cond and int(constraint.split(' ')[-1]) != not_cond or not_cond < global_lesser or not_cond > global_greater or not_cond in is_conditions:
+                return [(x, x + keys_per_segment) for x in range(0, 200000, keys_per_segment)]                
         else:
-            return sorted(time_periods)
+            if not_cond and not_cond == int(constraint.split(' ')[-1]):
+                return [(x, x + keys_per_segment) for x in range(0, 200000, keys_per_segment)]                
+            is_conditions.append(int(constraint.split(' ')[-1]))
             
-    # check latest_before and earliest_after
-    if latest_before >= earliest_after: # if we have before and after conditions covering whole range
-        time_periods = [[start_date, datetime.today()]]
-    else: # check the is conditions to add dates
-        time_periods = [[start_date, latest_before], [earliest_after, datetime.today()]]
-        # include is conditions
-        for is_cond in is_conditions:
-            if latest_before < is_cond < earliest_after:
-                time_periods.append([is_cond, is_cond])
-
-    return sorted(time_periods)
-
-def divide_into_year_segments(time_periods):
-    year_segments = []
-
-    for period in time_periods:
-        start_date, end_date = period
-
-        period_year = start_date.year
-        while period_year <= end_date.year:
-            next_year_start = datetime(period_year + 1, 1, 1)
-            if next_year_start > end_date:
-                year_segments.append((start_date, end_date))
-            else:
-                year_segments.append((start_date, next_year_start - timedelta(days=1)))
-            period_year += 1
-            start_date = next_year_start
-
-    return year_segments
-
-def divide_into_half_year_segments(time_periods):
-    half_year_segments = []
-
-    for period in time_periods:
-        start_date, end_date = period
-
-        while start_date <= end_date:
-            next_half_year_start = start_date + timedelta(days=183)
-            
-            if next_half_year_start > end_date:
-                half_year_segments.append((start_date, end_date))
-            else:
-                half_year_segments.append((start_date, next_half_year_start - timedelta(days=1)))
-                
-            start_date = next_half_year_start
-
-    return half_year_segments
-
-def divide_into_quarter_year_segments(time_periods):
-    quarter_year_segments = []
-
-    for period in time_periods:
-        start_date, end_date = period
-
-        while start_date <= end_date:
-            next_quarter_start = start_date + timedelta(days=91)
-            
-            if next_quarter_start > end_date:
-                quarter_year_segments.append((start_date, end_date))
-            else:
-                quarter_year_segments.append((start_date, next_quarter_start - timedelta(days=1)))
-                
-            start_date = next_quarter_start
-
-    return quarter_year_segments
-
-def divide_into_month_segments(time_periods):
-    month_segments = []
-
-    for period in time_periods:
-        start_date, end_date = period
-
-        while start_date <= end_date:
-            _, last_day = calendar.monthrange(start_date.year, start_date.month)
-            next_month_start = datetime(start_date.year, start_date.month, last_day) + timedelta(days=1)
-            
-            if next_month_start > end_date:
-                month_segments.append((start_date, end_date))
-            else:
-                month_segments.append((start_date, next_month_start - timedelta(days=1)))
-                
-            start_date = next_month_start
-
-    return month_segments
-
-def generate_segments(keys_per_segment):
-    # Define the start and end values
-    start_value = 0
-    end_value = 200000
-
-    # Initialize the segments list
-    segments = []
-
-    # Calculate the number of segments needed
-    num_segments = (end_value - start_value) // keys_per_segment
-
-    # Generate segments
-    for i in range(num_segments):
-        lower_bound = (i * keys_per_segment) - 1
-        upper_bound = (i + 1) * keys_per_segment
-        segments.append((lower_bound, upper_bound))
-
-    # Handle the last segment which might have less than keys_per_segment keys
-    if end_value % keys_per_segment != 0:
-        segments.append((upper_bound + 1, end_value))
-
-    return segments
-
+    # we have entire key set
+    if global_greater <= global_lesser + 1:
+        return [(x, x + keys_per_segment) for x in range(0, 200000, keys_per_segment)]
+    elif global_greater > 200000 and global_lesser < 0:
+        return [(x, x + keys_per_segment) for x in range(0, 200000, keys_per_segment)]
+    elif global_greater > 200000:
+        lesser = [(x, x + keys_per_segment) for x in range(0, global_lesser, keys_per_segment)]
+        is_conds = [(x, x) for x in is_conditions if x > global_lesser]
+        return lesser + is_conds
+    elif global_lesser < 0:
+        greater = [(x, x + keys_per_segment) for x in range(global_greater, 200000, keys_per_segment)]
+        is_conds = [(x, x) for x in is_conditions if x < global_greater]
+        return is_conds + greater
+    else:
+        # if one of the is conditions is between the lesser and greater conditions, then add to the list
+        lesser = [(x, x + keys_per_segment) for x in range(0, global_lesser, keys_per_segment)]
+        greater = [(x, x + keys_per_segment) for x in range(global_greater, 200000, keys_per_segment)]
+        is_conds = [(x, x) for x in is_conditions if global_lesser < x < global_greater]
+        return lesser + is_conds + greater
+    
 def format_segments_as_constraints(segments, general_constraints):
     
     constraints = []
@@ -674,7 +738,9 @@ def format_segments_as_constraints(segments, general_constraints):
         
         # Create a tuple of query rules for the start and end dates
         start_key, end_key = segment
-        start_query_rule = query_rule("Event", "ID", "is greater than", str(start_key))
+        if start_key == end_key:
+            end_key += 1
+        start_query_rule = query_rule("Event", "ID", "is greater than", str(start_key - 1))
         end_query_rule = query_rule("Event", "ID", "is less than", str(end_key))
         key_tuple = (start_query_rule, end_query_rule)
         
@@ -691,7 +757,7 @@ def format_segments_as_constraints(segments, general_constraints):
 
 def aggregate_csv_files(csv_files):
     if not csv_files:
-        print("No CSV files to aggregate.")
+        print("No results returned.")
         return
 
     # Create an empty DataFrame to store aggregated data
@@ -736,7 +802,10 @@ def submit_query(*args, **kwargs):
 
     # Download query
     if (kwargs['download'] and q._result_list_count > 0):
-        q.download(kwargs['csv_files'])
+        q.download(kwargs['csv_files'], kwargs['number_complete'], kwargs['total_queries'])
+    elif (q._result_list_count == 0):
+        with complete_lock:
+            kwargs['total_queries'].value -= 1
     
     # Return query object
     return q
@@ -746,7 +815,7 @@ def query(*args, download = False, require_all = True):
     The queries are input as a list of tuples or strings.
     """
     
-    date_constraints = []
+    key_constraints = []
     general_constraints = []
 
     # If no arguments, raise ValueError
@@ -774,39 +843,41 @@ def query(*args, download = False, require_all = True):
         if len(e_list):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
         
-        # if subfield == "EventDate":
-        #     date_constraints.append(f'{condition} {value}')
-        # else:
-        general_constraints.append(rule)
+        if subfield == "ID":
+            key_constraints.append(f'{condition} {value}')
+        else:
+            general_constraints.append(rule)
     
-    # generate time periods correlating with date constraints
-    time_periods = []
+    # generate key segments correlating with key constraints
+    key_segments = []
+    key_segment_length = 400
     if require_all:
-        time_periods = generate_time_periods_and(date_constraints)
+        key_segments = generate_key_segments_and(key_segment_length, key_constraints)
     else:
-        time_periods = generate_time_periods_or(date_constraints)
-    
-    # segments = divide_into_month_segments(time_periods)
-    segments = generate_segments(250)
+        key_segments = generate_key_segments_or(key_segment_length, key_constraints)
 
-    query_segments = format_segments_as_constraints(segments, general_constraints)
+    # generate query segments
+    query_segments = format_segments_as_constraints(key_segments, general_constraints)
                 
     # Create a multiprocessing Pool with the desired number of processes
     num_processes = cpu_count()  # Use all available CPU cores
     ql = Lock() # query lock
     dl = Lock() # download lock
     fl = Lock() # file lock
-    pool = Pool(initializer=init, initargs=(ql,dl,fl), processes=num_processes)
+    cl = Lock() # complete lock
+    pool = Pool(initializer=init, initargs=(ql, dl, fl, cl), processes=num_processes)
     
     start_time = time.time()
 
     # Create a multiprocessing-safe list to store CSV file names generated by each process
     manager = Manager()
     csv_files = manager.list()
+    number_complete = manager.Value('i', 0)
+    total_queries = manager.Value('i', len(query_segments))
     
     # Use the map function to distribute the segments among processes
     with pool as p:
-        p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files), query_segments)
+        p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files, number_complete = number_complete, total_queries = total_queries), query_segments)
 
     # Close the pool to free up resources
     pool.close()
