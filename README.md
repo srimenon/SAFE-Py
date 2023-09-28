@@ -125,3 +125,4 @@ q1 = "engine loss"
 q2 = ("12/10/2010", "EventDate", "is before", "Event")
 query(q1, q2, download=True)
 ```
+Segments of the requested data will be downloaded to ./output/['{query info here}'] until SAFEPy has finished downloading all data. Then, all data will be collected in the file ./output/aggregated_data.csv
