@@ -13,6 +13,9 @@ SAFEPy was created to streamline the process of gathering accident data from the
 ## Implementation
 The application is contained in a single python file `SAFEPy.py` and can be added using the standard python `import`. The module itself contains the `CAROLQuery` class, which is used by the application to interact with the CAROL database, along with the standard `query` function, which takes in a set of rules to query CAROL with.
 
+## Performance notes
+The application leverages multiprocessing to take advantage of the user's hardware. Because of this, performance is dependent on the number of CPUs on the user's machine. However, it is important to note that the speed of the application is limited by the speed and concurrency level of the NTSB servers. For large queries (yielding over 150000 accidents), please allow up to 1 hour for all data to be transferred. Queries yielding under 3500 datapoints will be completed in under 60 seconds. In general, completion time for queries is proportional to the number of resulting accident datapoints. 
+
 ## Quick Start
 Below is a small script demonstrating different queries that can be processed using the `query` function. For a full list of available queries, take a look at the [query_options](query_options.md) file.
 
