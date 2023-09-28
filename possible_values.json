@@ -9,59 +9,101 @@
                     "queryValues": [
                         {
                             "value": "AIR",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "BALL",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "BLIM",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "CSF",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "GLI",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "GYRO",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "HELI",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "PPAR",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "PLFT",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "RCKT",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "ULTR",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "UNK",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "UNMANNED",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "WSFT",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -71,52 +113,88 @@
                     "queryValues": [
                         {
                             "value": "ELEC",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "GTFN",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "HR",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "LR",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "NONE",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "REC",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "SR",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "TF",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "TJ",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "TP",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "TS",
-                            "conditions": ["is", "is not"]
-                          },
-                          {
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
                             "value": "UNK",
-                            "conditions": ["is", "is not"]
-                          }
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        }
                     ]
                 },
                 {
@@ -125,7 +203,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -135,7 +220,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -145,7 +237,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -155,11 +254,17 @@
                     "queryValues": [
                         {
                             "value": "true",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "false",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -169,7 +274,70 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["is", "is not", "is greater than", "is less than"]
+                            "conditions": [
+                                "is",
+                                "is not",
+                                "is greater than",
+                                "is less than"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "value": "Damage",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": "Destroyed",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Minor",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "None",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Substantial",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Unknown",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "value": "SerialNumber",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 }
@@ -184,7 +352,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -194,7 +369,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 }
@@ -209,7 +391,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -219,7 +408,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -229,11 +425,17 @@
                     "queryValues": [
                         {
                             "value": "true",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "false",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -243,7 +445,10 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -253,7 +458,10 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -263,7 +471,10 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -273,7 +484,10 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -283,11 +497,17 @@
                     "queryValues": [
                         {
                             "value": "true",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "false",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -297,11 +517,17 @@
                     "queryValues": [
                         {
                             "value": "true",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "false",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -311,11 +537,17 @@
                     "queryValues": [
                         {
                             "value": "true",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         },
                         {
                             "value": "false",
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 }
@@ -330,7 +562,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -340,7 +579,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -350,7 +596,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 }
@@ -365,7 +618,10 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 }
@@ -379,8 +635,18 @@
                     "input": "Dropdown",
                     "queryValues": [
                         {
-                            "value": null,
-                            "conditions": ["is", "is not"]
+                            "value": "IMC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "VMC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 }
@@ -395,7 +661,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -405,7 +678,45 @@
                     "queryValues": [
                         {
                             "value": "Aviation",
-                            "conditions": [ "is", "is not"]
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Hazmat",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Highway",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Marine",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Pipeline",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Railroad",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -415,7 +726,12 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["is", "is not", "is greater than", "is less than"]
+                            "conditions": [
+                                "is",
+                                "is not",
+                                "is greater than",
+                                "is less than"
+                            ]
                         }
                     ]
                 },
@@ -425,7 +741,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -434,8 +757,25 @@
                     "input": "Dropdown",
                     "queryValues": [
                         {
-                            "value": null,
-                            "conditions": [ "is", "is not"]
+                            "value": "NTSB",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Other",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Coast Guard",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -445,7 +785,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": [ "is", "is not", "is after", "is before", "is on or after", "is on or before"]
+                            "conditions": [
+                                "is",
+                                "is not",
+                                "is after",
+                                "is before",
+                                "is on or after",
+                                "is on or before"
+                            ]
                         }
                     ]
                 },
@@ -455,7 +802,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": [ "is", "is not", "is after", "is before", "is on or after", "is on or before"]
+                            "conditions": [
+                                "is",
+                                "is not",
+                                "is after",
+                                "is before",
+                                "is on or after",
+                                "is on or before"
+                            ]
                         }
                     ]
                 },
@@ -465,7 +819,14 @@
                     "queryValues": [
                         {
                             "value": null,
-                            "conditions": ["contains", "does not contain", "is", "is not", "starts with", "ends with"]
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
                         }
                     ]
                 },
@@ -474,8 +835,403 @@
                     "input": "Dropdown",
                     "queryValues": [
                         {
-                            "value": null,
-                            "conditions": ["is", "is not"]
+                            "value": "AL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CB",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "DE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "DC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "HI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ID",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ME",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MD",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NJ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ND",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "OH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "OK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "OR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "OF",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "RI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SD",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TX",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "UT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "VT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "VA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -484,8 +1240,1817 @@
                     "input": "Dropdown",
                     "queryValues": [
                         {
-                            "value": null,
-                            "conditions": ["is", "is not"]
+                            "value": "AF",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AQ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "AJ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BF",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FQ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BB",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BD",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "VG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BX",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "UV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CB",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CJ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CD",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CF",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CW",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "HR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CUW",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "EZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "DA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "DJ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "DO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "DR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "EC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "EG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ES",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "EK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ER",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "EN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ET",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "EU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FJ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "FS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GB",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GJ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "GY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "HA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "HM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "HO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "HK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "HU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ID",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "EI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "IY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "JM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "JN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "JA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "JE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "JO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "JU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KQ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ML",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MB",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MF",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MX",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MD",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MW",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NF",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CQ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "MU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PW",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PF",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "RP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "QA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "KS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "RE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "RO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "RS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "RW",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SR",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "LO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "BP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SF",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SX",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ST",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SB",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "VC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SW",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "SY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TW",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TO",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TL",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TD",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "PS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TU",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TX",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TV",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "UG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "UP",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "TC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "UK",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "USA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "UN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "UY",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "UZ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NH",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "VT",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "VE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "VM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WQ",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WF",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WE",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WN",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "WS",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "YM",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "CG",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ZA",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "ZI",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -494,8 +3059,32 @@
                     "input": "Dropdown",
                     "queryValues": [
                         {
-                            "value": null,
-                            "conditions": ["is", "is not"]
+                            "value": "Fatal",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Minor",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "None",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Serious",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 },
@@ -504,8 +3093,25 @@
                     "input": "Dropdown",
                     "queryValues": [
                         {
-                            "value": null,
-                            "conditions": ["is", "is not"]
+                            "value": "ACC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "INC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "OCC",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
                         }
                     ]
                 }
@@ -517,11 +3123,295 @@
             "queryValues": [
                 {
                     "value": "true",
-                    "conditions": ["is", "is not"]
+                    "conditions": [
+                        "is",
+                        "is not"
+                    ]
                 },
                 {
                     "value": "false",
-                    "conditions": ["is", "is not"]
+                    "conditions": [
+                        "is",
+                        "is not"
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "Finding",
+            "subfields": [
+                {
+                    "value": "FindingText",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "Case",
+            "subfields": [
+                {
+                    "value": "ProbableCause",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "value": "OpenClosedStatus",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": "true",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "false",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "Recs",
+            "subfields": [
+                {
+                    "value": "Srid",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "value": "OpenClosed",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": "open",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "closed",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "value": "IsReiterated",
+                    "input": "Boolean",
+                    "queryValues": [
+                        {
+                            "value": "true",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "value": "Subject",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "value": "AddresseeName",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "value": "AddresseeCategory",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": "1",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "2",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "3",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "4",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "5",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "7",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "8",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "9",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "Correspondence",
+            "subfields": [
+                {
+                    "value": "Summary",
+                    "input": "Text",
+                    "queryValues": [
+                        {
+                            "value": null,
+                            "conditions": [
+                                "contains",
+                                "does not contain",
+                                "is",
+                                "is not",
+                                "starts with",
+                                "ends with"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "value": "CorrespondenceType",
+                    "input": "Dropdown",
+                    "queryValues": [
+                        {
+                            "value": "Non-Recipient Correspondence",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "NPRM Response",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Official Correspondence",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Reiteration",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        },
+                        {
+                            "value": "Transmittal Letter",
+                            "conditions": [
+                                "is",
+                                "is not"
+                            ]
+                        }
+                    ]
                 }
             ]
         }

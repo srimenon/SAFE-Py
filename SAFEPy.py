@@ -136,8 +136,8 @@ class CAROLQuery:
     def __del__(self):
         self._session.close()
 
-    def addQueryGroup(self, rule, condition, subfield, andOr):
-        if andOr:
+    def addQueryGroup(self, rule, condition, subfield, has_key_constraint):
+        if has_key_constraint:
             # if we already have a rule in the current query group
             if len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) > 2 and subfield != "ID":
                 self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
@@ -153,16 +153,19 @@ class CAROLQuery:
             elif subfield != "ID":
                 self._general_constraints.append(rule)
         else:
-            # Create a new query group for every rule
-            new_query_group = copy.deepcopy(self._query_group)
-            new_query_group["QueryRules"].append(rule)
-            self._probe["QueryGroups"].append(new_query_group)
-            self._payload["QueryGroups"].append(new_query_group)
-            self._curr_group_index = len(self._probe["QueryGroups"]) - 1
-            if subfield != "ID":
-                self._general_constraints.append(rule)
+            # if no group yet
+            if len(self._probe["QueryGroups"]) == 1 and len(self._probe["QueryGroups"][self._curr_group_index]["QueryRules"]) == 0:
+                if subfield != "ID":
+                    self._general_constraints.append(rule)
+            else:
+                # Create a new query group for every rule
+                self._probe["QueryGroups"].append(copy.deepcopy(self._query_group))
+                self._payload["QueryGroups"].append(copy.deepcopy(self._query_group))
+                self._curr_group_index = len(self._probe["QueryGroups"]) - 1
+                if subfield != "ID":
+                    self._general_constraints.append(rule)
 
-    def addQueryRule(self, field, subfield, condition, values, andOr):
+    def addQueryRule(self, field, subfield, condition, values, andOr, has_key_constraint):
         """Adds a query rule to the CAROLQuery class.
         """
         if condition and subfield and field:
@@ -175,33 +178,54 @@ class CAROLQuery:
             condition = "contains"
             input_t = self._data[field][subfield]["input"]
             
-        self._values.append(f'{condition} {values}')
+        self._values.append(f'{subfield} {condition} {values}')
 
-        rule =  {
-            "RuleType": "Simple",
-            "Values": [values],
-            "Columns": [f"{field}.{subfield}"],
-            "Operator": condition,
-            "selectedOption": {
-                "FieldName": subfield,
-                "DisplayText": "",
+        rule = None
+        if subfield:
+            rule =  {
+                "RuleType": "Simple",
+                "Values": [values],
                 "Columns": [f"{field}.{subfield}"],
-                "Selectable": True,
-                "InputType": input_t,
-                "RuleType": 0,
-                "Options": None,
-                "TargetCollection": "cases",
-                "UnderDevelopment": False
-            },
-            "overrideColumn": ""
-        }
+                "Operator": condition,
+                "selectedOption": {
+                    "FieldName": subfield,
+                    "DisplayText": "",
+                    "Columns": [f"{field}.{subfield}"],
+                    "Selectable": True,
+                    "InputType": input_t,
+                    "RuleType": 0,
+                    "Options": None,
+                    "TargetCollection": "cases",
+                    "UnderDevelopment": False
+                },
+                "overrideColumn": ""
+            }
+        else:
+            rule =  {
+                "RuleType": "Simple",
+                "Values": [values],
+                "Columns": [f"{field}"],
+                "Operator": condition,
+                "selectedOption": {
+                    "FieldName": subfield,
+                    "DisplayText": "",
+                    "Columns": [f"{field}"],
+                    "Selectable": True,
+                    "InputType": input_t,
+                    "RuleType": 0,
+                    "Options": None,
+                    "TargetCollection": "cases",
+                    "UnderDevelopment": False
+                },
+                "overrideColumn": ""
+            }
         
         # the current number of groups - 1
         self._curr_group_index = len(self._probe["QueryGroups"]) - 1
         
         # if "or" logic and not the first rule
         if not andOr:
-            self.addQueryGroup(rule, condition, subfield, andOr)
+            self.addQueryGroup(rule, condition, subfield, has_key_constraint)
                     
         # append the rule to the probe and the download payload
         self._probe["QueryGroups"][self._curr_group_index]["QueryRules"].append(rule)
@@ -388,6 +412,9 @@ def query_decide(value: str):
     normalized_value = value.lower().strip()
     try:
         parsed_date = parser.parse(normalized_value)
+        # Check if the parsed date is in the future and adjust the year if necessary
+        if parsed_date > datetime.now():
+            parsed_date = parsed_date.replace(year=parsed_date.year - 100)
         print(f"Using default condition: is on or after\n" + 
             f"Detected date: {parsed_date}\n" +
             f"Adding date condition to query.")
@@ -400,6 +427,17 @@ def query_decide(value: str):
     match = re.match(cond_date_regex, normalized_value)
     if match:
         return "Event", "EventDate", match.group(1), to_standard_date_format(match.group(1), match.group(2))
+    
+    # Check valid fields
+    query_key_section, _ = query_key_sort(normalized_value)
+    if query_key_section == 0:
+        print("Found field")
+    elif query_key_section == 1:
+        print("Found subfield")
+    elif query_key_section == 2:
+        print("Found condition")
+    elif query_key_section == 3:
+        print("Found value")
     else:
         print(f"Searching factual narrative for: {normalized_value}")
         return "Narrative", "Factual", "contains", normalized_value
@@ -408,7 +446,7 @@ def query_key_sort(value):
     str_methods = [str, str.lower, str.capitalize, str.upper]
     for m in str_methods:
         value = m(value)
-        if value in query_keys.fields:
+        if value in query_keys.fields:                
             return 0, value
         if value in query_keys.subfields:
             return 1, value
@@ -416,7 +454,7 @@ def query_key_sort(value):
             return 2, value
         if value in query_keys.values:
             return 3, value
-    return -1, value
+    return -1, value.lower()
 
 def query_rule_sort(arg):
     rule = [None]*4
@@ -728,35 +766,62 @@ def generate_key_segments_or(keys_per_segment, key_constraints):
                 return [(x, x + keys_per_segment) for x in range(0, 200000, keys_per_segment)]                
             is_conditions.append(int(constraint.split(' ')[-1]))
             
-    # we have entire key set
+    # divide segments
+    segments = []
     if global_greater <= global_lesser + 1:
-        return [(x, x + keys_per_segment) for x in range(0, 200000, keys_per_segment)]
+        segments = [(x, min(x + keys_per_segment - 1, 200000)) for x in range(0, 200001, keys_per_segment)]
     elif global_greater > 200000 and global_lesser < 0:
-        return [(x, x + keys_per_segment) for x in range(0, 200000, keys_per_segment)]
+        segments = [(x, min(x + keys_per_segment - 1, 200000)) for x in range(0, 200001, keys_per_segment)]
     elif global_greater > 200000:
-        lesser = [(x, x + keys_per_segment) for x in range(0, global_lesser, keys_per_segment)]
+        lesser = [(x, min(x + keys_per_segment - 1, global_lesser)) for x in range(0, global_lesser, keys_per_segment)]
         is_conds = [(x, x) for x in is_conditions if x > global_lesser]
-        return lesser + is_conds
+        segments = lesser + is_conds
     elif global_lesser < 0:
-        greater = [(x, x + keys_per_segment) for x in range(global_greater, 200000, keys_per_segment)]
+        greater = [(x, min(x + keys_per_segment - 1, 200000)) for x in range(global_greater, 200001, keys_per_segment)]  # 200000 is the maximum possible key
         is_conds = [(x, x) for x in is_conditions if x < global_greater]
-        return is_conds + greater
+        segments = is_conds + greater
     else:
         # if one of the is conditions is between the lesser and greater conditions, then add to the list
-        lesser = [(x, x + keys_per_segment) for x in range(0, global_lesser, keys_per_segment)]
-        greater = [(x, x + keys_per_segment) for x in range(global_greater, 200000, keys_per_segment)]
+        lesser = [(x, min(x + keys_per_segment - 1, global_lesser)) for x in range(0, global_lesser, keys_per_segment)]
+        greater = [(x, min(x + keys_per_segment - 1, 200000)) for x in range(global_greater, 200001, keys_per_segment)]  # 200000 is the maximum possible key
         is_conds = [(x, x) for x in is_conditions if global_lesser < x < global_greater]
-        return lesser + is_conds + greater
+        segments = lesser + is_conds + greater
+        
+    comp_segments = calculate_complementary_keys(segments, keys_per_segment)
+    return segments, comp_segments
     
-def format_segments_as_constraints(segments, general_constraints):
+def calculate_complementary_keys(segments, keys_per_segment):
     
+    total_keys = set(range(200001))
+    
+    keys_in_segments = set()
+    for start, end in segments:
+        keys_in_segments.update(range(start, end + 1))
+    complementary_keys = total_keys - keys_in_segments
+    
+    # Convert the set of complementary keys to a sorted list
+    complementary_keys_list = sorted(list(complementary_keys))
+    
+    # Divide the complementary keys into segments
+    complementary_segments = []
+    for i in range(0, len(complementary_keys_list), keys_per_segment):
+        start = complementary_keys_list[i]
+        if i + keys_per_segment - 1 < len(complementary_keys_list):
+            end = min(complementary_keys_list[i + keys_per_segment - 1], start + keys_per_segment - 1)
+        else:
+            end = complementary_keys_list[-1]
+        complementary_segments.append((start, end))
+    
+    return complementary_segments
+    
+def format_segments_as_constraints(segments, general_constraints, key_complement):
+    
+    # handle keys first
     constraints = []
     for segment in segments:
         
         # Create a tuple of query rules for the start and end dates
         start_key, end_key = segment
-        if start_key == end_key:
-            end_key += 1
         start_query_rule = query_rule("Event", "ID", "is greater than", str(start_key - 1))
         end_query_rule = query_rule("Event", "ID", "is less than", str(end_key + 1))
         key_tuple = (start_query_rule, end_query_rule)
@@ -764,11 +829,30 @@ def format_segments_as_constraints(segments, general_constraints):
         # Convert the tuple to a list
         extended_list = list(key_tuple)
 
-        # Extend the list with elements from general constraints
-        extended_list.extend(general_constraints) 
+        if not key_complement:
+            # Extend the list with elements from general constraints
+            extended_list.extend(general_constraints) 
 
         # Convert the extended list back to a tuple
         constraints.append(tuple(extended_list))
+        
+    if key_complement:
+        general_constraints = [x for x in general_constraints if x.subfield != 'ID']
+        for segment in key_complement:
+                # Create a tuple of query rules for the start and end dates
+                start_key, end_key = segment
+                start_query_rule = query_rule("Event", "ID", "is greater than", str(start_key - 1))
+                end_query_rule = query_rule("Event", "ID", "is less than", str(end_key + 1))
+                key_tuple = (start_query_rule, end_query_rule)
+                
+                # Convert the tuple to a list
+                extended_list = list(key_tuple)
+    
+                # Extend the list with elements from general constraints
+                extended_list.extend(general_constraints) 
+    
+                # Convert the extended list back to a tuple
+                constraints.append(tuple(extended_list))
     
     return constraints
 
@@ -809,7 +893,7 @@ def submit_query(*args, **kwargs):
     for rule in args:
 
         # Add query rule from args
-        q.addQueryRule(rule.field, rule.subfield, rule.condition, rule.value, kwargs['require_all'])
+        q.addQueryRule(rule.field, rule.subfield, rule.condition, rule.value, kwargs['require_all'], kwargs['has_key_constraint'])
 
     # add "or" or "and" to values
     q._values.append(f"require_all = {kwargs['require_all']}")
@@ -849,9 +933,6 @@ def query(*args, download = False, require_all = True):
     for arg in args:
         field, subfield, condition, value = query_rule_sort(arg)
         
-        # create query_rule object
-        rule = query_rule(field, subfield, condition, value)
-        
         # Check to make sure all query parameters were filled
         e_list = []
         if not field:
@@ -866,36 +947,99 @@ def query(*args, download = False, require_all = True):
         if len(e_list):
             raise ValueError(f"Incorrect {e_list} found in argument {arg}.")
         
+        # create query_rule object
+        rule = query_rule(field, subfield, condition, value)
+        
         if subfield == "ID" and download == True:
             key_constraints.append(f'{condition} {value}')
+            general_constraints.append(rule)
         else:
             general_constraints.append(rule)
-         
+        
+    has_key_constraint = len(key_constraints) > 0
     gen_rule = tuple(general_constraints)
     if download == False:
-        submit_query(*gen_rule, download = download, require_all = require_all)
+        submit_query(*gen_rule, download = download, require_all = require_all, only_download = False, has_key_constraint = has_key_constraint)
     else:
+        
+        global_lower_bound_rule = None
+        global_upper_bound_rule = None
         
         one_request = False
         print("Checking number of datapoints for request...")
-        result_count = submit_query(*gen_rule, download = False, require_all = require_all, only_download = one_request)._result_list_count
+        result_count = submit_query(*gen_rule, download = False, require_all = require_all, only_download = one_request, has_key_constraint = False)._result_list_count
         if 0 < result_count < 3500:
             print("Good news! We can download the data in one request.")
             one_request = True
         elif result_count == 0:
             print("No results found.")
             return
+        else:
+            print("Query too big for one reqeust. Dividing into segments and optimizing search...")
+            optimizing_result_count = 0
+            if not has_key_constraint:
+                # Initialize the search bounds
+                lower_bound = 0
+                upper_bound = 200000
+                segment_size = 400
+
+                while upper_bound - lower_bound > segment_size:
+                    middle = lower_bound + (upper_bound - lower_bound) // 2
+                    print(f"Searching in the range ({lower_bound}, {middle})...")
+
+                    # Create key constraints for the lower half of the search space
+                    lower_bound_rule = query_rule("Event", "ID", "is greater than", str(lower_bound - 1))
+                    upper_bound_rule = query_rule("Event", "ID", "is less than", str(middle))
+
+                    # Check all rules in gen_rule
+                    found = False
+                    for rule in gen_rule:
+                        modified_gen_rule = (rule,) + (lower_bound_rule, upper_bound_rule)
+
+                        # Resubmit the query with the updated search space
+                        optimizing_result_count = submit_query(*modified_gen_rule, download=False, require_all=True, only_download=one_request, has_key_constraint=has_key_constraint)._result_list_count
+                        
+                        if optimizing_result_count > 0:
+                            found = True
+                            break
+
+                    print(f'Found {optimizing_result_count} results in the range ({lower_bound}, {middle})')
+
+                    if found:
+                        # If a result is found in the lower half, continue searching in the lower half
+                        upper_bound = middle
+                    else:
+                        # If no result is found in the lower half, search in the upper half
+                        lower_bound = middle + 1
+
+                # At this point, the range (lower_bound, upper_bound) is the smallest segment containing a valid key
+                global_lower_bound_rule = query_rule("Event", "ID", "is greater than", str(lower_bound - 1))
+                global_upper_bound_rule = query_rule("Event", "ID", "is less than", str(upper_bound))
+
+        complement_flag = True
+        if global_lower_bound_rule and global_upper_bound_rule:
+            # restrict based on optimization
+            key_constraints.append(f'{global_lower_bound_rule.condition} {global_lower_bound_rule.value}')
+            complement_flag = False
     
         # generate key segments correlating with key constraints
         key_segments = []
+        key_complement = []
         key_segment_length = 400
+        has_key_constraint = True
         if require_all:
             key_segments = generate_key_segments_and(key_segment_length, key_constraints)
-        else:
-            key_segments = generate_key_segments_or(key_segment_length, key_constraints)
+        elif not key_constraints:
+            key_segments, _ = generate_key_segments_or(key_segment_length, key_constraints)
+        elif key_constraints:
+            key_segments, key_complement = generate_key_segments_or(key_segment_length, key_constraints)
 
         # generate query segments
-        query_segments = format_segments_as_constraints(key_segments, general_constraints)
+        query_segments = []
+        if complement_flag:
+            query_segments = format_segments_as_constraints(key_segments, general_constraints, key_complement)
+        else:
+            query_segments = format_segments_as_constraints(key_segments, general_constraints, [])
                     
         # Create a multiprocessing Pool with the desired number of processes
         num_processes = cpu_count()  # Use all available CPU cores
@@ -915,9 +1059,9 @@ def query(*args, download = False, require_all = True):
         # Use the map function to distribute the segments among processes
         with pool as p:
             if one_request:
-                p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files, number_complete = number_complete, total_queries = 1, only_download = one_request), [gen_rule])
+                p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files, number_complete = number_complete, total_queries = manager.Value('i', 1), only_download = one_request, has_key_constraint = False), [gen_rule])
             else:
-                p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files, number_complete = number_complete, total_queries = total_queries, only_download = one_request), query_segments)
+                p.starmap(partial(submit_query, download = download, require_all = require_all, csv_files = csv_files, number_complete = number_complete, total_queries = total_queries, only_download = one_request, has_key_constraint = has_key_constraint), query_segments)
 
         # Close the pool to free up resources
         pool.close()
@@ -941,8 +1085,27 @@ if __name__ == '__main__':
         # query("engine power", datetime.today() - timedelta(days=1), datetime.today())
         # query('How many airplanes crash because of airplane failure?')
         # query()
+        
+    # query(('HasSafetyRec', 'is', 'true'), download=False)
 
-    # query(('Event', 'ID', 'is greater than', '190000'), ('Event', 'EventDate', 'is on or after', '10-23-2020'), ('Aircraft', 'AircraftCategory', 'is', 'BLIM'), download=False, require_all=True)
-    query(('Event', 'EventDate', 'is on or after', '10-23-2022'), ('Event', 'EventDate', 'is on or before', '10-23-1950'), download=True, require_all=True)
+    # non key query with 2 conditions
+    # query(('Event', 'EventDate', 'is on or after', '9-23-2020'), ('Airport', 'AirportId', 'contains', 'fire'), download=True, require_all=True)
+    
+    # non key query with 3 conditions
+    # query(('Aircraft', 'AircraftCategory', 'is', 'BLIM'), ('Aircraft', 'Damage', 'is', 'None'), ('Event', 'EventDate', 'is on or after', '9/23/2020'), require_all=False, download=True)
+    
+    # # key query with 2 conditions - one and one
+    query(('Event', 'ID', 'is greater than', '50000'), ('Aircraft', 'AircraftCategory', 'is', 'HELI'), require_all=True, download=True)
+    
+    # # key query with 3 conditions - two and one
+    # query(('Event', 'ID', 'is greater than', '193455'), ('Event', 'ID', 'is less than', '3334'), ('Aircraft', 'AircraftCategory', 'is', 'BLIM'), require_all=True, download=True)
+    
+    # # key query with 3 conditions - three and one
+    # query(('Event', 'ID', 'is greater than', '193455'), ('Event', 'ID', 'is less than', '3334'), ('Aircraft', 'AircraftCategory', 'is', 'BLIM'), require_all=False, download=True)
+    
+    
+    # query(('Event', 'EventDate', 'is on or after', '10-23-20'), download=True, require_all=True)
+    # query(('Aircraft', 'AircraftCategory', 'is', 'BLIM'), ('Aircraft', 'Damage', 'is', 'None'), require_all=False, download=True)
+    # query(('Event', 'ID', 'is greater than', '193455'), ('Event', 'ID', 'is less than', '3334'), require_all=False, download=True)
     # query("is on or after 1/1/2023", "is before 1/1/1949", download=True, require_all=False)
     # query("fire", "engine power", download=True, require_all=False)
