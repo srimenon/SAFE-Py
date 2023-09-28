@@ -7,6 +7,9 @@ This repository contains the SAFEPy Programmable Query Application for querying 
 This was developed by Gage Broberg, Wyatt McGinnis, Srihari Menon and Prof Nancy Currie-Gregg from the Systems Analysis & Functional Evaluation Laboratory (SAFELab) at Texas A&M University.
 This tool is open-source and free-to-use. Please reference our publication when you do!
 
+## Motivation
+SAFEPy was created to streamline the process of gathering accident data from the National Transportation Safety Board database by allowing users to download data programmatically. In addition, SAFEPy solves the problem of long server response times/server response timeouts by breaking up large queries into several, easier to manage ones.
+
 ## Implementation
 The application is contained in a single python file `SAFEPy.py` and can be added using the standard python `import`. The module itself contains the `CAROLQuery` class, which is used by the application to interact with the CAROL database, along with the standard `query` function, which takes in a set of rules to query CAROL with.
 
