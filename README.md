@@ -14,7 +14,7 @@ SAFEPy was created to streamline the process of gathering accident data from the
 The application is contained in a single python file `SAFEPy.py` and can be added using the standard python `import`. The module itself contains the `CAROLQuery` class, which is used by the application to interact with the CAROL database, along with the standard `query` function, which takes in a set of rules to query CAROL with.
 
 ## Quick Start
-Below is a small script demonstrating different queries that can be processed using the `query` function.
+Below is a small script demonstrating different queries that can be processed using the `query` function. For a full list of available queries, take a look at the [query_options](query_options.md) file.
 
 ```
 import SAFEPy
