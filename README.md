@@ -32,17 +32,33 @@ SAFEPy.query(q2, q1, q3)
 The SAFEPy library contains the `CAROLQuery` class, the `query` function, and other helper functions used to sort input parameters into their respective fields.
 
 ### query
-The `query` function is the main workhorse of the SAFEPy library. It takes an arbritrary number of different arguments and converts them into query rules, which it then uses to create a CAROLQuery object to probe the CAROL database. A single argument is formatted as either a string or a tuple of strings, which are sorted into rules using helper functions. For query fields that are missing from an argument, the application uses the existing elements along with a dictionary of known values to fill in the missing values. If the program cannot decide which fields fit the existing arguments, it raises an exception and halts the program. These arguments can contain key words or dates in the format `MM-DD-YYYY, MM-DD-YY, MM/DD/YYYY, MM/DD/YY` as shown below.
+The `query` function is the main workhorse of the SAFEPy library. It takes an arbritrary number of different arguments and converts them into query rules, which it then uses to create a CAROLQuery object to probe the CAROL database. A single argument is formatted as either a string or a tuple of strings, which are sorted into rules using helper functions. For query fields that are missing from an argument, the application uses the existing elements along with a dictionary of known values to fill in the missing values. If the program cannot decide which fields fit the existing arguments, it raises an exception and halts the program. These arguments can contain key words and dates. For a full list of available queries, take a look at [a relative link](possible_queries.md).
+
+### Date queries
+Date queries can be submitted with just the date like the following:
+
 ```
 #Valid date argument
-q = "01/01/2000"
-q = "02-20-12"
+q = "September 27, 2023"
+q = "27 Sep 2023"
+q = "09/27/2023" (mm/dd/yyyy)
+q = "27/09/2023" (dd/mm/yyyy)
+q = "2023/09/27" (yyyy/mm/dd)
+q = "9/27/23" (m/d/yy)
+q = "27/9/23" (d/m/yy)
+q = "2023/9/27" (yyyy/m/d)
+q = "2023-09-27"
+q = "2023.09.27"
+```
+
+
 
 #Invalid date argument
-q = "2000/01/01"
-q = "05\23\1999"
+q = "today"
+q = datetime.today()
+```
 
-#Valid 1 element arguments
+All 1 element arguments will be considered valid. If entered as a date
 q = "engine power"
 q = ("fire",)
 
