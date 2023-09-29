@@ -830,6 +830,7 @@ def query(*args, download = False, require_all = True):
                 upper_bound = 200000
                 segment_size = 400
 
+                # search for the lowest valid segment
                 while upper_bound - lower_bound > segment_size:
                     middle = lower_bound + (upper_bound - lower_bound) // 2
                     print(f"Searching in the range ({lower_bound}, {middle})...\n")
@@ -840,16 +841,26 @@ def query(*args, download = False, require_all = True):
 
                     # Check all rules in gen_rule
                     found = False
-                    for rule in gen_rule:
-                        modified_gen_rule = (rule,) + (lower_bound_rule, upper_bound_rule)
+                    if require_all:
+                        modified_gen_rule = gen_rule + (lower_bound_rule, upper_bound_rule)
 
                         # Resubmit the query with the updated search space
                         optimizing_result_count = submit_query(*modified_gen_rule, download=False, require_all=True, only_download=one_request, has_key_constraint=has_key_constraint)._result_list_count
                         
                         if optimizing_result_count > 0:
                             found = True
-                            break
+                    else:
+                        found = False
+                        for rule in gen_rule:
+                            modified_gen_rule = gen_rule + (lower_bound_rule, upper_bound_rule)
 
+                            # Resubmit the query with the updated search space
+                            optimizing_result_count = submit_query(*modified_gen_rule, download=False, require_all=True, only_download=one_request, has_key_constraint=has_key_constraint)._result_list_count
+                            
+                            if optimizing_result_count > 0:
+                                found = True
+                                break
+                            
                     print(f'Found {optimizing_result_count} results in the range ({lower_bound}, {middle})')
 
                     if found:
@@ -859,14 +870,65 @@ def query(*args, download = False, require_all = True):
                         # If no result is found in the lower half, search in the upper half
                         lower_bound = middle + 1
 
-                # At this point, the range (lower_bound, upper_bound) is the smallest segment containing a valid key
+                # set global lower bound
                 global_lower_bound_rule = query_rule("Event", "ID", "is greater than", str(lower_bound - 1))
+                
+                # reinit search bounds
+                lower_bound = 0
+                upper_bound = 200000
+                segment_size = 400
+
+                # search for the highest valid segmentq
+                while upper_bound - lower_bound > segment_size:
+                    middle = lower_bound + (upper_bound - lower_bound) // 2
+                    print(f"Searching in the range ({middle}, {upper_bound})...\n")
+
+                    # Create key constraints for the lower half of the search space
+                    lower_bound_rule = query_rule("Event", "ID", "is greater than", str(middle - 1))
+                    upper_bound_rule = query_rule("Event", "ID", "is less than", str(upper_bound))
+
+                    # Check all rules in gen_rule
+                    found = False
+                    if require_all:
+                        modified_gen_rule = gen_rule + (lower_bound_rule, upper_bound_rule)
+
+                        # Resubmit the query with the updated search space
+                        optimizing_result_count = submit_query(*modified_gen_rule, download=False, require_all=True, only_download=one_request, has_key_constraint=has_key_constraint)._result_list_count
+                        
+                        if optimizing_result_count > 0:
+                            found = True
+                    else:
+                        found = False
+                        for rule in gen_rule:
+                            modified_gen_rule = (rule,) + (lower_bound_rule, upper_bound_rule)
+
+                            # Resubmit the query with the updated search space
+                            optimizing_result_count = submit_query(*modified_gen_rule, download=False, require_all=True, only_download=one_request, has_key_constraint=has_key_constraint)._result_list_count
+                            
+                            if optimizing_result_count > 0:
+                                found = True
+                                break
+
+                    print(f'Found {optimizing_result_count} results in the range ({middle}, {upper_bound})')
+
+                    if found:
+                        # If a result is found in the upper half, continue searching in the upper half
+                        lower_bound = middle
+                    else:
+                        # If no result is found in the lower half, search in the upper half
+                        upper_bound = middle - 1
+
+                # set global upper bound
                 global_upper_bound_rule = query_rule("Event", "ID", "is less than", str(upper_bound))
 
         complement_flag = True
-        if global_lower_bound_rule and global_upper_bound_rule:
+        if global_lower_bound_rule:
             # restrict based on optimization
             key_constraints.append(f'{global_lower_bound_rule.condition} {global_lower_bound_rule.value}')
+            complement_flag = False
+        if global_upper_bound_rule:
+            # restrict based on optimization
+            key_constraints.append(f'{global_upper_bound_rule.condition} {global_upper_bound_rule.value}')
             complement_flag = False
     
         # generate key segments correlating with key constraints
@@ -934,7 +996,7 @@ if __name__ == '__main__':
     # query(('HasSafetyRec', 'is', 'true'), download=False)
 
     # non key query with 2 conditions
-    query(('Event', 'EventDate', 'is on or after', '9-23-2020'), ('Factual', 'Narrative', 'contains', 'fire'), download=True, require_all=False)
+    query(('Event', 'EventDate', 'is on or after', '9-23-2010'), ('Event', 'EventDate', 'is on or before', '10/23/2013'), download=True, require_all=True)
     
     # non key query with 3 conditions
     # query(('Aircraft', 'AircraftCategory', 'is', 'BLIM'), ('Aircraft', 'Damage', 'is', 'None'), ('Event', 'EventDate', 'is on or after', '9/23/2020'), require_all=False, download=True)
