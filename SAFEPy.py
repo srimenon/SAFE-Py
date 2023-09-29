@@ -937,11 +937,16 @@ def query(*args, download = False, require_all = True):
         key_segment_length = 400
         has_key_constraint = True
         if require_all:
+            complement_flag = False
             key_segments = generate_key_segments_and(key_segment_length, key_constraints)
         elif not key_constraints:
             key_segments, _ = generate_key_segments_or(key_segment_length, key_constraints)
         elif key_constraints:
             key_segments, key_complement = generate_key_segments_or(key_segment_length, key_constraints)
+
+        # remove key constraints from general constraints
+        if require_all:
+            general_constraints = [x for x in general_constraints if x.subfield != 'ID']
 
         # generate query segments
         query_segments = []
