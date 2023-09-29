@@ -852,7 +852,7 @@ def query(*args, download = False, require_all = True):
                     else:
                         found = False
                         for rule in gen_rule:
-                            modified_gen_rule = gen_rule + (lower_bound_rule, upper_bound_rule)
+                            modified_gen_rule = (rule, ) + (lower_bound_rule, upper_bound_rule)
 
                             # Resubmit the query with the updated search space
                             optimizing_result_count = submit_query(*modified_gen_rule, download=False, require_all=True, only_download=one_request, has_key_constraint=has_key_constraint)._result_list_count
